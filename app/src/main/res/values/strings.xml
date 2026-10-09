@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ClickLog</string>
+    <string name="launch_receiver_label">ClickLog – przycisk</string>
+    <string name="accessibility_service_label">ClickLog – przycisk SOS</string>
+    <string name="accessibility_service_description">Pozwala aplikacji ClickLog rejestrować naciśnięcia sprzętowego przycisku programowalnego (SOS) także przy zgaszonym ekranie. Usługa nie czyta treści ekranu.</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_name">Usługa ClickLog</string>
+    <string name="notification_channel_description">Stała notyfikacja usługi rejestrującej kliknięcia</string>
+    <string name="notification_title">Kliknięć w sesji: %1$d</string>
+    <string name="notification_no_clicks">Brak kliknięć w tej sesji</string>
+    <string name="notification_last_click">Ostatnie: %1$s</string>
+    <string name="notification_action_stop">Zatrzymaj</string>
+
+    <!-- Common -->
+    <string name="next">Dalej</string>
+    <string name="back">Wstecz</string>
+    <string name="skip">Pomiń</string>
+    <string name="finish">Zakończ</string>
+    <string name="cancel">Anuluj</string>
+    <string name="ok">OK</string>
+    <string name="retry">Powtórz test</string>
+    <string name="yes">tak</string>
+    <string name="no">nie</string>
+    <string name="unknown">nieznane</string>
+    <string name="share">Udostępnij</string>
+    <string name="save_file">Zapisz plik</string>
+
+    <!-- Paths -->
+    <string name="path_a">A – KEY_EVENT (usługa dostępności)</string>
+    <string name="path_b">B – LAUNCH_INTENT (uruchomienie aplikacji)</string>
+    <string name="path_none">brak (nie wykryto)</string>
+    <string name="path_mode_auto">AUTO (wynik kreatora)</string>
+
+    <!-- Main screen -->
+    <string name="main_title">ClickLog</string>
+    <string name="main_session_count">Kliknięć w sesji</string>
+    <string name="main_last_click">Ostatnie kliknięcie</string>
+    <string name="main_no_clicks">brak</string>
+    <string name="main_service_status">Usługa w tle</string>
+    <string name="main_service_running">działa</string>
+    <string name="main_service_stopped">zatrzymana</string>
+    <string name="main_start_service">Uruchom usługę</string>
+    <string name="main_stop_service">Zatrzymaj usługę</string>
+    <string name="main_permissions">Uprawnienia</string>
+    <string name="main_accessibility">Usługa dostępności</string>
+    <string name="main_accessibility_enabled">włączona</string>
+    <string name="main_accessibility_disabled">wyłączona</string>
+    <string name="main_accessibility_connected">włączona, połączona</string>
+    <string name="main_notifications">Powiadomienia</string>
+    <string name="main_granted">przyznane</string>
+    <string name="main_denied">brak</string>
+    <string name="main_battery">Optymalizacja baterii</string>
+    <string name="main_battery_ignored">wyłączona (OK)</string>
+    <string name="main_battery_active">aktywna</string>
+    <string name="main_active_path">Aktywna ścieżka</string>
+    <string name="main_keycode">Keycode</string>
+    <string name="main_screen_off">Działa przy zgaszonym ekranie</string>
+    <string name="main_events">Lista zdarzeń</string>
+    <string name="main_settings">Ustawienia</string>
+    <string name="main_wizard">Kreator konfiguracji</string>
+    <string name="main_wizard_not_done">Kreator nie został ukończony – uruchom go, aby wykryć przycisk.</string>
+    <string name="main_session_id">Sesja</string>
+    <string name="main_fix">Napraw</string>
+
+    <!-- Events -->
+    <string name="events_title">Zdarzenia w sesji</string>
+    <string name="events_empty">Brak kliknięć w tej sesji.</string>
+    <string name="events_uptime">uptime</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ustawienia</string>
+    <string name="settings_new_session">Nowa sesja</string>
+    <string name="settings_new_session_confirm">Rozpocząć nową sesję? Licznik zacznie od zera; poprzednie kliknięcia zostają w bazie i w eksporcie wszystkich sesji.</string>
+    <string name="settings_export_csv">Eksport CSV (bieżąca sesja)</string>
+    <string name="settings_export_csv_all">Eksport CSV (wszystkie sesje)</string>
+    <string name="settings_export_how">Jak zapisać plik?</string>
+    <string name="settings_debounce">Okno debounce (ms)</string>
+    <string name="settings_debounce_hint">Kolejne naciśnięcie szybciej niż to okno jest ignorowane (auto-repeat).</string>
+    <string name="settings_path">Ścieżka przechwytywania</string>
+    <string name="settings_diagnostics_mode">Tryb diagnostyki (zapisuj wszystkie zdarzenia do logu)</string>
+    <string name="settings_vibrate">Wibracja przy zarejestrowanym kliknięciu</string>
+    <string name="settings_battery">Wyłącz optymalizację baterii</string>
+    <string name="settings_battery_ok">Optymalizacja baterii jest już wyłączona</string>
+    <string name="settings_run_wizard">Uruchom kreator ponownie</string>
+    <string name="settings_diagnostics">Diagnostyka przycisku</string>
+    <string name="settings_open_accessibility">Ustawienia dostępności</string>
+    <string name="settings_open_system">Ustawienia systemu (Przycisk programowalny)</string>
+    <string name="settings_exported">Zapisano plik</string>
+    <string name="settings_export_failed">Eksport nie powiódł się: %1$s</string>
+    <string name="settings_export_empty">Brak danych do eksportu</string>
+
+    <!-- Wizard -->
+    <string name="wizard_title">Kreator konfiguracji</string>
+    <string name="wizard_step">Krok %1$d z %2$d</string>
+    <string name="wizard_step1_title">1. Przypisz przycisk SOS do ClickLog</string>
+    <string name="wizard_step1_text">W ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do aplikacji ClickLog – jeśli lista pokazuje dwa wpisy, wybierz „ClickLog – przycisk”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
+    <string name="wizard_step1_open_settings">Otwórz ustawienia systemu</string>
+    <string name="wizard_step2_title">2. Włącz usługę dostępności</string>
+    <string name="wizard_step2_text">Usługa dostępności pozwala odbierać przycisk jako KeyEvent także przy zgaszonym ekranie (ścieżka A). Otwórz ustawienia dostępności, znajdź „ClickLog – przycisk SOS” i włącz. Jeśli system nie pozwoli, kreator użyje ścieżki B.</string>
+    <string name="wizard_step2_open">Otwórz ustawienia dostępności</string>
+    <string name="wizard_step2_status_on">Usługa dostępności: włączona ✔</string>
+    <string name="wizard_step2_status_off">Usługa dostępności: wyłączona</string>
+    <string name="wizard_step3_title">3. Test przycisku</string>
+    <string name="wizard_step3_text">Naciśnij teraz przycisk SOS 3 razy. Nie dotykaj ikony aplikacji ani innych klawiszy. Aplikacja nasłuchuje na wszystkich kanałach i pokazuje na żywo, co dociera.</string>
+    <string name="wizard_step3_presses">Wykryte naciśnięcia: %1$d / 3</string>
+    <string name="wizard_step3_time_left">Pozostało: %1$d s</string>
+    <string name="wizard_step3_live">Zdarzenia na żywo</string>
+    <string name="wizard_step3_nothing_yet">Jeszcze nic nie dotarło…</string>
+    <string name="wizard_step3_start">Rozpocznij test</string>
+    <string name="wizard_step3_summary">Podsumowanie</string>
+    <string name="wizard_summary_counts">Usługa dostępności: %1$d · Activity: %2$d · Intenty: %3$d · Broadcasty: %4$d · Media: %5$d</string>
+    <string name="wizard_reason_accessibility">Usługa dostępności widzi przycisk (keycode %1$d). Wybrano ścieżkę A.</string>
+    <string name="wizard_reason_activity_only">Przycisk dociera do ekranu aplikacji (keycode %1$d), ale usługa dostępności go nie przechwytuje – ścieżka A nie zadziała w tle. Zostanie użyta ścieżka B.</string>
+    <string name="wizard_reason_launch">System uruchamia aplikację przy naciśnięciu. Wybrano ścieżkę B (LAUNCH_INTENT).</string>
+    <string name="wizard_reason_none">Nie wykryto przycisku.</string>
+    <string name="wizard_checklist_title">Sprawdź:</string>
+    <string name="wizard_checklist_assigned">• Czy przycisk jest przypisany do ClickLog w ustawieniach systemu?</string>
+    <string name="wizard_checklist_accessibility">• Czy usługa dostępności ClickLog jest włączona?</string>
+    <string name="wizard_checklist_sos">• Czy domyślna akcja SOS została wyłączona?</string>
+    <string name="wizard_step4_title">4. Test przy zgaszonym ekranie</string>
+    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania, naciśnij przycisk SOS 3 razy, a potem odblokuj telefon i wróć tutaj. Aplikacja policzy, ile naciśnięć zarejestrowano w tym czasie.</string>
+    <string name="wizard_step4_count">Zarejestrowano przy zgaszonym ekranie: %1$d</string>
+    <string name="wizard_step4_start">Rozpocznij test</string>
+    <string name="wizard_step4_skip_no_path">Pomiń (nie wykryto ścieżki)</string>
+    <string name="wizard_step5_title">5. Wynik</string>
+    <string name="wizard_result_path">Wybrana ścieżka: %1$s</string>
+    <string name="wizard_result_keycode">Keycode: %1$s (scancode %2$s)</string>
+    <string name="wizard_result_screen_off">Działa przy zgaszonym ekranie: %1$s</string>
+    <string name="wizard_result_screen_off_untested">nie testowano</string>
+    <string name="wizard_result_save">Zapisz i uruchom usługę</string>
+    <string name="wizard_result_save_nopath">Zapisz mimo to</string>
+    <string name="wizard_result_hint_b">Ścieżka B budzi ekran i nie ma znacznika czasu jądra; dokładność ok. 30–100 ms.</string>
+
+    <!-- Diagnostics -->
+    <string name="diag_title">Diagnostyka przycisku</string>
+    <string name="diag_capture_on">Nasłuch aktywny – naciskaj przycisk, zdarzenia pojawią się poniżej.</string>
+    <string name="diag_export">Eksportuj log</string>
+    <string name="diag_clear">Wyczyść log</string>
+    <string name="diag_clear_confirm">Usunąć cały log diagnostyczny?</string>
+    <string name="diag_empty">Log jest pusty.</string>
+    <string name="diag_count">Wpisów: %1$d</string>
+    <string name="diag_screen_off_tag">ekran zgaszony</string>
+</resources>

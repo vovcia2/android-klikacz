@@ -1,0 +1,35 @@
+# TESTING.md — checklista ręczna na CAT S75
+
+Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
+
+## Testy automatyczne
+
+```
+./gradlew testDebugUnitTest
+```
+
+- `ClickProcessorTest` — debounce 149/151 ms, granica okna, konwersja `eventTime → wall`,
+  kolejność i zawartość zapisu, `reset()`.
+- `PathSelectorTest` — reguła wyboru ścieżki (§3.3) dla wszystkich kombinacji wejść,
+  liczniki naciśnięć (na żywo i przy zgaszonym ekranie).
+- `CsvExporterTest` — nagłówek i format wierszy `clicks.csv`.
+
+## Checklista na S75
+
+| # | Test | Kroki | Oczekiwane | Wynik |
+|---|---|---|---|---|
+| 1 | Kreator wykrywa przycisk i wybiera ścieżkę | Pierwsze uruchomienie → kroki 1–5 kreatora, w kroku 3 nacisnąć SOS 3× | Krok 3 pokazuje zdarzenia na żywo i podsumowanie z wybraną ścieżką (A lub B) i keycode; wynik zapisany, na ekranie głównym „Aktywna ścieżka” ≠ brak | |
+| 2 | 100 kliknięć przy zgaszonym ekranie | Zgasić ekran, nacisnąć SOS 100× (odstępy > 150 ms), odblokować | Licznik sesji wzrósł dokładnie o 100; lista zdarzeń bez duplikatów (różnice czasu > okno debounce) | |
+| 3 | Odchylenie timestampu < 50 ms (ścieżka A) | Nagrać filmem telefon + zewnętrzny zegar z ms (np. time.is) przy naciśnięciu; porównać `wall_time_ms` z CSV | Różnica < 50 ms | |
+| 4 | Działa po restarcie telefonu | Z włączoną usługą zrestartować telefon, nie otwierać aplikacji, nacisnąć SOS | Notyfikacja usługi wraca po starcie; kliknięcie zarejestrowane | |
+| 5 | Długie przytrzymanie nie uruchamia połączenia alarmowego | Przytrzymać SOS 3 s | Brak połączenia alarmowego / ekranu SOS (ścieżka A konsumuje klawisz; w ścieżce B wymaga wyłączenia akcji SOS w ustawieniach systemu) | |
+| 6 | Eksport CSV i logu diagnostycznego | Ustawienia → Eksport CSV → „Udostępnij” oraz „Zapisz plik”; Diagnostyka → ikona udostępniania | Share sheet otwiera się, plik ma nagłówek `id,session_id,wall_time_iso,wall_time_ms,uptime_ms,source`; `diagnostic_log.txt` zawiera wpisy | |
+| 7 | Debounce | Ustawić 1000 ms, kliknąć 2× w ciągu 0,5 s | Zarejestrowane 1 kliknięcie | |
+| 8 | Nowa sesja | Ustawienia → Nowa sesja | Licznik = 0, nowy `session_id`, stare wpisy w „Eksport CSV (wszystkie sesje)” | |
+| 9 | Optymalizacja baterii | Główny ekran → „Napraw” przy optymalizacji baterii | Systemowy dialog; po zgodzie status „wyłączona (OK)” | |
+| 10 | Test ekranu zgaszonego w kreatorze | Krok 4 kreatora | Licznik pokazuje liczbę naciśnięć przy zgaszonym ekranie; w wyniku „Działa przy zgaszonym ekranie: tak” | |
+
+## Otwarte pytania (§11) — do ustalenia kreatorem
+
+1. Czy *Programmable Key* pozwala przypisać dowolną aplikację (ścieżka B)? Wynik: ______
+2. Czy `AccessibilityService` widzi klawisz SOS (ścieżka A)? Keycode: ______ Scancode: ______
