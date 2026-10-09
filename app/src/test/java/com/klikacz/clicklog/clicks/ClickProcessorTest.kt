@@ -1,7 +1,10 @@
 package com.klikacz.clicklog.clicks
 
 import com.klikacz.clicklog.data.ClickEntity
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -20,16 +23,32 @@ class ClickProcessorTest {
     private fun intent(monotonic: Long, wall: Long = 1_000_000L + monotonic) =
         RawClick(wallTimeMs = wall, uptimeMs = null, monotonicMs = monotonic, source = ClickSourceType.LAUNCH_INTENT)
 
+    /**
+     * The processor's consumer coroutine runs on the test scheduler under a job we cancel at the
+     * end of each test; `backgroundScope` is not driven by `advanceUntilIdle`.
+     */
     private class Harness(scope: TestScope, debounce: Int = 150) {
         val persisted = mutableListOf<ClickEntity>()
         private var nextId = 1L
+        private val job = SupervisorJob()
         val processor = ClickProcessor(
-            scope = scope,
+            scope = CoroutineScope(StandardTestDispatcher(scope.testScheduler) + job),
             ioDispatcher = StandardTestDispatcher(scope.testScheduler),
             debounceMs = { debounce },
             sessionId = { 42L },
             persist = { e -> e.copy(id = nextId++).also { persisted += it } },
         )
+
+        fun close() = job.cancel()
+    }
+
+    private fun harnessTest(debounce: Int = 150, body: suspend TestScope.(Harness) -> Unit) = runTest {
+        val h = Harness(this, debounce)
+        try {
+            body(h)
+        } finally {
+            h.close()
+        }
     }
 
     @Test
@@ -45,8 +64,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `second click 149 ms later is debounced`() = runTest {
-        val h = Harness(this)
+    fun `second click 149 ms later is debounced`() = harnessTest { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         assertNull(h.processor.offer(key(1_149)))
         advanceUntilIdle()
@@ -54,8 +72,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `second click 151 ms later is accepted`() = runTest {
-        val h = Harness(this)
+    fun `second click 151 ms later is accepted`() = harnessTest { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         assertNotNull(h.processor.offer(key(1_151)))
         advanceUntilIdle()
@@ -63,8 +80,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `click exactly at window boundary is accepted`() = runTest {
-        val h = Harness(this)
+    fun `click exactly at window boundary is accepted`() = harnessTest { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         assertNotNull(h.processor.offer(key(1_150)))
         advanceUntilIdle()
@@ -72,8 +88,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `debounce is measured from last accepted click, not last rejected`() = runTest {
-        val h = Harness(this)
+    fun `debounce is measured from last accepted click, not last rejected`() = harnessTest { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         assertNull(h.processor.offer(key(1_100)))   // rejected
         assertNull(h.processor.offer(key(1_140)))   // 140 ms after accepted -> rejected
@@ -83,8 +98,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `clicks are persisted in arrival order with session id and source`() = runTest {
-        val h = Harness(this)
+    fun `clicks are persisted in arrival order with session id and source`() = harnessTest { h ->
         h.processor.offer(key(1_000, wall = 10))
         h.processor.offer(intent(2_000, wall = 20))
         h.processor.offer(key(3_000, wall = 30))
@@ -97,10 +111,9 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `stored flow emits after persistence`() = runTest {
-        val h = Harness(this)
+    fun `stored flow emits after persistence`() = harnessTest { h ->
         val seen = mutableListOf<Long>()
-        val job = kotlinx.coroutines.launch { h.processor.stored.collect { seen += it.id } }
+        val job = launch { h.processor.stored.collect { seen += it.id } }
         advanceUntilIdle()
         h.processor.offer(key(1_000))
         h.processor.offer(key(2_000))
@@ -110,8 +123,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `reset forgets debounce state`() = runTest {
-        val h = Harness(this)
+    fun `reset forgets debounce state`() = harnessTest { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         h.processor.reset()
         assertNotNull(h.processor.offer(key(1_010)))
@@ -120,8 +132,7 @@ class ClickProcessorTest {
     }
 
     @Test
-    fun `custom debounce window is honoured`() = runTest {
-        val h = Harness(this, debounce = 500)
+    fun `custom debounce window is honoured`() = harnessTest(debounce = 500) { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         assertNull(h.processor.offer(key(1_400)))
         assertNotNull(h.processor.offer(key(1_500)))
