@@ -75,21 +75,18 @@
     <string name="settings_new_session_confirm">Rozpocząć nową sesję? Licznik zacznie od zera; poprzednie kliknięcia zostają w bazie i w eksporcie wszystkich sesji.</string>
     <string name="settings_export_csv">Eksport CSV (bieżąca sesja)</string>
     <string name="settings_export_csv_all">Eksport CSV (wszystkie sesje)</string>
-    <string name="settings_export_how">Jak zapisać plik?</string>
     <string name="settings_debounce">Okno debounce (ms)</string>
     <string name="settings_debounce_hint">Kolejne naciśnięcie szybciej niż to okno jest ignorowane (auto-repeat).</string>
     <string name="settings_path">Ścieżka przechwytywania</string>
     <string name="settings_diagnostics_mode">Tryb diagnostyki (zapisuj wszystkie zdarzenia do logu)</string>
     <string name="settings_vibrate">Wibracja przy zarejestrowanym kliknięciu</string>
     <string name="settings_battery">Wyłącz optymalizację baterii</string>
-    <string name="settings_battery_ok">Optymalizacja baterii jest już wyłączona</string>
     <string name="settings_run_wizard">Uruchom kreator ponownie</string>
     <string name="settings_diagnostics">Diagnostyka przycisku</string>
     <string name="settings_open_accessibility">Ustawienia dostępności</string>
     <string name="settings_open_system">Ustawienia systemu (Przycisk programowalny)</string>
     <string name="settings_exported">Zapisano plik</string>
     <string name="settings_export_failed">Eksport nie powiódł się: %1$s</string>
-    <string name="settings_export_empty">Brak danych do eksportu</string>
 
     <!-- Wizard -->
     <string name="wizard_title">Kreator konfiguracji</string>

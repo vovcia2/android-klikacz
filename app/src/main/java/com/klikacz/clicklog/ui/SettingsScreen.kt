@@ -67,11 +67,12 @@ fun SettingsScreen(
         exportAll = null
     }
 
+    val shareTitle = stringResource(R.string.share)
     LaunchedEffect(Unit) {
         viewModel.events.collect { ev ->
             when (ev) {
                 is SettingsEvent.Message -> snackbar.showSnackbar(ev.text)
-                is SettingsEvent.Share -> context.startActivity(Intent.createChooser(ev.intent, context.getString(R.string.share)))
+                is SettingsEvent.Share -> context.startActivity(Intent.createChooser(ev.intent, shareTitle))
             }
         }
     }

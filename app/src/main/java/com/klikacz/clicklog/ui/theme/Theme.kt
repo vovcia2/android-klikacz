@@ -1,6 +1,5 @@
 package com.klikacz.clicklog.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -18,11 +17,8 @@ private val DarkColors = darkColorScheme(primary = Color(0xFFEF9A9A), secondary 
 fun ClickLogTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
     val context = LocalContext.current
-    val scheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ->
-            if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        dark -> DarkColors
-        else -> LightColors
-    }
+    // minSdk 31: dynamic color is always available; static schemes remain as a fallback.
+    val scheme = runCatching { if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context) }
+        .getOrElse { if (dark) DarkColors else LightColors }
     MaterialTheme(colorScheme = scheme, content = content)
 }

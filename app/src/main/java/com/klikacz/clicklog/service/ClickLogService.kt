@@ -1,5 +1,6 @@
 package com.klikacz.clicklog.service
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -85,6 +86,8 @@ class ClickLogService : LifecycleService() {
         super.onDestroy()
     }
 
+    // SPECIAL_USE is an inlined constant; ServiceCompat masks it on API < 34.
+    @SuppressLint("InlinedApi")
     private fun startInForeground(notification: Notification) {
         ServiceCompat.startForeground(
             this,

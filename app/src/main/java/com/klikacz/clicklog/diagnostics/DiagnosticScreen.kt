@@ -56,11 +56,12 @@ fun DiagnosticScreen(viewModel: DiagnosticViewModel, onBack: () -> Unit) {
         onPauseOrDispose { viewModel.stopCapture() }
     }
 
+    val shareTitle = stringResource(R.string.share)
     LaunchedEffect(Unit) {
         viewModel.uiEvents.collect { ev ->
             when (ev) {
                 is SettingsEvent.Message -> snackbar.showSnackbar(ev.text)
-                is SettingsEvent.Share -> context.startActivity(Intent.createChooser(ev.intent, context.getString(R.string.share)))
+                is SettingsEvent.Share -> context.startActivity(Intent.createChooser(ev.intent, shareTitle))
             }
         }
     }

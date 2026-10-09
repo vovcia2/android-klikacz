@@ -91,12 +91,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** Diagnostics channel "Activity.onKeyDown/onKeyUp" (spec §3.2), logged before any view sees it. */
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        if (event.repeatCount == 0 || event.action == KeyEvent.ACTION_UP) {
-            logger.logKeyEvent(DiagnosticChannel.ACTIVITY_KEY, event)
-        }
-        return super.dispatchKeyEvent(event)
+    /** Diagnostics channel "Activity.onKeyDown/onKeyUp" (spec §3.2). Auto-repeat DOWNs are skipped. */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.repeatCount == 0) logger.logKeyEvent(DiagnosticChannel.ACTIVITY_KEY, event)
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        logger.logKeyEvent(DiagnosticChannel.ACTIVITY_KEY, event)
+        return super.onKeyUp(keyCode, event)
     }
 
     private fun requestNotificationPermissionIfNeeded() {
