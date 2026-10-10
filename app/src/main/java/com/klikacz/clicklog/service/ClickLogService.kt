@@ -24,6 +24,7 @@ import com.klikacz.clicklog.clicks.ClickRepository
 import com.klikacz.clicklog.data.DiagnosticChannel
 import com.klikacz.clicklog.data.Settings
 import com.klikacz.clicklog.diagnostics.DiagnosticLogger
+import com.klikacz.clicklog.location.LocationTagger
 import com.klikacz.clicklog.ui.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -86,15 +87,14 @@ class ClickLogService : LifecycleService() {
         super.onDestroy()
     }
 
-    // SPECIAL_USE is an inlined constant; ServiceCompat masks it on API < 34.
+    // SPECIAL_USE is an inlined constant; ServiceCompat masks it on API < 34. The LOCATION type
+    // lets clicks be geotagged while the app is in the background; it may only be declared when
+    // the location permission is granted, otherwise startForeground throws on API 34+.
     @SuppressLint("InlinedApi")
     private fun startInForeground(notification: Notification) {
-        ServiceCompat.startForeground(
-            this,
-            NOTIFICATION_ID,
-            notification,
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE,
-        )
+        var type = ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+        if (LocationTagger.hasPermission(this)) type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, type)
     }
 
     private fun setUpMediaSession() {

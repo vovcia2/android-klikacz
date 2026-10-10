@@ -25,6 +25,12 @@ interface ClickDao {
     @Query("SELECT * FROM clicks ORDER BY id ASC")
     suspend fun listAll(): List<ClickEntity>
 
+    @Query(
+        "UPDATE clicks SET latitude = :lat, longitude = :lon, location_accuracy_m = :accuracyM, " +
+            "location_age_ms = :ageMs, location_provider = :provider WHERE id = :id",
+    )
+    suspend fun updateLocation(id: Long, lat: Double, lon: Double, accuracyM: Float?, ageMs: Long, provider: String?)
+
     @Query("SELECT COUNT(*) FROM clicks WHERE session_id = :sessionId AND wall_time_ms >= :sinceWallMs")
     fun observeCountSince(sessionId: Long, sinceWallMs: Long): Flow<Int>
 }

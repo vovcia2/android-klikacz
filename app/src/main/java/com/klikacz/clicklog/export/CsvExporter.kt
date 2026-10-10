@@ -61,14 +61,19 @@ class CsvExporter @Inject constructor(
         const val TEXT_MIME = "text/plain"
 
         fun buildClicksCsv(rows: List<ClickEntity>): String = buildString {
-            append("id,session_id,wall_time_iso,wall_time_ms,uptime_ms,source\n")
+            append("id,session_id,wall_time_iso,wall_time_ms,uptime_ms,source,latitude,longitude,location_accuracy_m,location_age_ms,location_provider\n")
             for (r in rows) {
                 append(r.id).append(',')
                 append(r.sessionId).append(',')
                 append(TimeFormat.iso(r.wallTimeMs)).append(',')
                 append(r.wallTimeMs).append(',')
                 append(r.uptimeMs ?: "").append(',')
-                append(r.source.name).append('\n')
+                append(r.source.name).append(',')
+                append(r.latitude?.let { String.format(java.util.Locale.US, "%.6f", it) } ?: "").append(',')
+                append(r.longitude?.let { String.format(java.util.Locale.US, "%.6f", it) } ?: "").append(',')
+                append(r.locationAccuracyM?.let { String.format(java.util.Locale.US, "%.1f", it) } ?: "").append(',')
+                append(r.locationAgeMs ?: "").append(',')
+                append(r.locationProvider ?: "").append('\n')
             }
         }
 

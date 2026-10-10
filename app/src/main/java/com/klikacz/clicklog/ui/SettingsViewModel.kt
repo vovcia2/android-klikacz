@@ -52,6 +52,7 @@ class SettingsViewModel @Inject constructor(
     fun setPressGesture(g: PressGesture) = viewModelScope.launch { settings.setPressGesture(g) }
     fun setDiagnosticsMode(on: Boolean) = viewModelScope.launch { settings.setDiagnosticsMode(on) }
     fun setVibrate(on: Boolean) = viewModelScope.launch { settings.setVibrateOnClick(on) }
+    fun setSaveLocation(on: Boolean) = viewModelScope.launch { settings.setSaveLocation(on) }
 
     /** Export to a document picked with `ACTION_CREATE_DOCUMENT`. */
     fun exportCsvTo(uri: Uri, allSessions: Boolean) = viewModelScope.launch {

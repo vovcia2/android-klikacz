@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ClickLog</string>
-    <string name="launch_receiver_label">ClickLog – przycisk</string>
+    <string name="launch_receiver_label">ClickLog – button</string>
     <string name="accessibility_service_label">ClickLog – przycisk SOS</string>
     <string name="accessibility_service_description">Pozwala aplikacji ClickLog rejestrować naciśnięcia sprzętowego przycisku programowalnego (SOS) także przy zgaszonym ekranie. Usługa nie czyta treści ekranu.</string>
 
@@ -32,7 +32,7 @@
     <string name="path_b">B – LAUNCH_INTENT (uruchomienie aplikacji)</string>
     <string name="path_none">brak (nie wykryto)</string>
     <string name="path_mode_auto">AUTO (wynik kreatora)</string>
-    <string name="path_launch_note">Uruchomienia „ClickLog – przycisk” są liczone zawsze, niezależnie od ścieżki.</string>
+    <string name="path_launch_note">Uruchomienia „ClickLog – button” są liczone zawsze, niezależnie od ścieżki.</string>
 
     <!-- Main screen -->
     <string name="main_title">ClickLog</string>
@@ -55,6 +55,9 @@
     <string name="main_battery">Optymalizacja baterii</string>
     <string name="main_battery_ignored">wyłączona (OK)</string>
     <string name="main_battery_active">aktywna</string>
+    <string name="main_location">Lokalizacja</string>
+    <string name="main_location_foreground">przyznana (tylko gdy usługa działa)</string>
+    <string name="main_location_background">przyznana (cały czas)</string>
     <string name="main_active_path">Aktywna ścieżka</string>
     <string name="main_keycode">Keycode</string>
     <string name="main_screen_off">Działa przy zgaszonym ekranie</string>
@@ -69,6 +72,7 @@
     <string name="events_title">Zdarzenia w sesji</string>
     <string name="events_empty">Brak kliknięć w tej sesji.</string>
     <string name="events_uptime">uptime</string>
+    <string name="events_no_location">brak lokalizacji</string>
 
     <!-- Settings -->
     <string name="settings_title">Ustawienia</string>
@@ -88,6 +92,11 @@
     <string name="settings_diagnostics_mode">Tryb diagnostyki (zapisuj wszystkie zdarzenia do logu)</string>
     <string name="settings_vibrate">Wibracja przy zarejestrowanym kliknięciu</string>
     <string name="settings_battery">Wyłącz optymalizację baterii</string>
+    <string name="settings_location">Lokalizacja</string>
+    <string name="settings_location_save">Zapisuj przybliżoną lokalizację kliknięcia</string>
+    <string name="settings_location_hint">Przy każdym kliknięciu zapisywana jest ostatnia znana pozycja, a potem w ciągu 30 s pozycja z sieci/WiFi w trybie niskiego poboru energii (bez ciągłego GPS). W tle działa dzięki usłudze pierwszoplanowej; dla pewności przy zgaszonym ekranie zezwól na lokalizację „cały czas”.</string>
+    <string name="settings_location_permission">Zezwól na lokalizację</string>
+    <string name="settings_location_background">Zezwól na lokalizację w tle (cały czas)</string>
     <string name="settings_run_wizard">Uruchom kreator ponownie</string>
     <string name="settings_diagnostics">Diagnostyka przycisku</string>
     <string name="settings_open_accessibility">Ustawienia dostępności</string>
@@ -99,7 +108,7 @@
     <string name="wizard_title">Kreator konfiguracji</string>
     <string name="wizard_step">Krok %1$d z %2$d</string>
     <string name="wizard_step1_title">1. Przypisz przycisk SOS do ClickLog</string>
-    <string name="wizard_step1_text">W ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do „ClickLog – przycisk” (jeśli lista pokazuje dwa wpisy ClickLog, wybierz ten z dopiskiem „przycisk”). Jeśli system pozwala przypisać aplikację tylko do podwójnego naciśnięcia, użyj go i w ustawieniach ClickLog wybierz „Gest: podwójne naciśnięcie”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
+    <string name="wizard_step1_text">W ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do „ClickLog – button” (jeśli lista pokazuje dwa wpisy ClickLog, wybierz ten z dopiskiem „button”). Jeśli system pozwala przypisać aplikację tylko do podwójnego naciśnięcia, użyj go i w ustawieniach ClickLog wybierz „Gest: podwójne naciśnięcie”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
     <string name="wizard_step1_open_settings">Otwórz ustawienia systemu</string>
     <string name="wizard_step2_title">2. Włącz usługę dostępności</string>
     <string name="wizard_step2_text">Usługa dostępności pozwala odbierać przycisk jako KeyEvent także przy zgaszonym ekranie (ścieżka A). Otwórz ustawienia dostępności, znajdź „ClickLog – przycisk SOS” i włącz. Jeśli system nie pozwoli, kreator użyje ścieżki B.</string>

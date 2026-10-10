@@ -4,6 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverter
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.klikacz.clicklog.clicks.ClickSourceType
 
 class Converters {
@@ -22,7 +24,7 @@ class Converters {
 
 @Database(
     entities = [ClickEntity::class, DiagnosticEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -32,5 +34,16 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         const val NAME = "clicklog.db"
+
+        /** v2: rough location columns on clicks. */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE clicks ADD COLUMN latitude REAL")
+                db.execSQL("ALTER TABLE clicks ADD COLUMN longitude REAL")
+                db.execSQL("ALTER TABLE clicks ADD COLUMN location_accuracy_m REAL")
+                db.execSQL("ALTER TABLE clicks ADD COLUMN location_age_ms INTEGER")
+                db.execSQL("ALTER TABLE clicks ADD COLUMN location_provider TEXT")
+            }
+        }
     }
 }

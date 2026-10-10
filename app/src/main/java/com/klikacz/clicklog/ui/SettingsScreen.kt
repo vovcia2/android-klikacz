@@ -1,5 +1,6 @@
 package com.klikacz.clicklog.ui
 
+import android.Manifest
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,6 +64,8 @@ fun SettingsScreen(
     var confirmNewSession by remember { mutableStateOf(false) }
     var exportAll by remember { mutableStateOf<Boolean?>(null) }
 
+    val requestLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
+    val requestBackgroundLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     val createDocument = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(CsvExporter.CSV_MIME)) { uri ->
         val all = exportAll ?: false
         if (uri != null) viewModel.exportCsvTo(uri, all)
@@ -128,6 +131,17 @@ fun SettingsScreen(
             SectionCard {
                 SwitchRow(stringResource(R.string.settings_vibrate), s.vibrateOnClick, viewModel::setVibrate)
                 SwitchRow(stringResource(R.string.settings_diagnostics_mode), s.diagnosticsMode, viewModel::setDiagnosticsMode)
+            }
+
+            SectionCard(title = stringResource(R.string.settings_location)) {
+                SwitchRow(stringResource(R.string.settings_location_save), s.saveLocation, viewModel::setSaveLocation)
+                Text(stringResource(R.string.settings_location_hint), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
+                OutlinedButton(onClick = {
+                    requestLocation.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_location_permission)) }
+                OutlinedButton(onClick = {
+                    requestBackgroundLocation.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_location_background)) }
             }
 
             SectionCard {

@@ -58,9 +58,9 @@ sekwencyjnie przez kolejkę na wątku IO do Room (`clicks`). `ClickLogService` (
 
 ### Dwa wpisy na liście aplikacji
 
-Aplikacja ma dwie ikony: **ClickLog** (główny ekran) i **ClickLog – przycisk**
+Aplikacja ma dwie ikony: **ClickLog** (główny ekran) i **ClickLog – button**
 (`LaunchReceiverActivity`). Systemowy wybór aplikacji dla *Programmable Key* zwykle pokazuje
-aktywności z kategorii LAUNCHER – do przycisku należy przypisać **ClickLog – przycisk**.
+aktywności z kategorii LAUNCHER – do przycisku należy przypisać **ClickLog – button**.
 Jeśli vendor pozwala wybrać tylko „ClickLog”, kreator i tak wykryje uruchomienie (`MainActivity`
 loguje każdy Intent, a przy ścieżce B uruchomienie z zapamiętanym referrerem liczy się jako klik).
 
@@ -95,9 +95,18 @@ app/src/main/java/com/klikacz/clicklog/
   di/            AppModule (Hilt)
 ```
 
+## Lokalizacja
+
+Każde kliknięcie dostaje przybliżoną pozycję (kolumny `latitude`, `longitude`,
+`location_accuracy_m`, `location_age_ms`, `location_provider`): natychmiast ostatnia znana
+pozycja z `LocationManager` (fused/network/gps), a potem w ciągu 30 s wynik
+`getCurrentLocation` w trybie `QUALITY_LOW_POWER`. Wymaga uprawnienia lokalizacji; usługa
+pierwszoplanowa dostaje wtedy typ `location`, żeby działało w tle. Opcjonalnie „cały czas”
+(`ACCESS_BACKGROUND_LOCATION`). Wyłączane w ustawieniach. Brak Play Services.
+
 ## Eksport
 
-- `clicks.csv` – kolumny `id, session_id, wall_time_iso, wall_time_ms, uptime_ms, source`;
+- `clicks.csv` – kolumny `id, session_id, wall_time_iso, wall_time_ms, uptime_ms, source, latitude, longitude, location_accuracy_m, location_age_ms, location_provider`;
   przez `ACTION_CREATE_DOCUMENT` („Zapisz plik”) lub share sheet („Udostępnij”).
 - `diagnostic_log.txt` – TSV z pełnym logiem diagnostycznym, przez share sheet.
 

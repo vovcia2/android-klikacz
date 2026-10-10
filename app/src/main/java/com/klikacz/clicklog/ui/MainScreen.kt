@@ -1,5 +1,8 @@
 package com.klikacz.clicklog.ui
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +41,9 @@ fun MainScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val requestLocation = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        viewModel.refreshStatus()
+    }
 
     LifecycleResumeEffect(Unit) {
         viewModel.refreshStatus()
@@ -137,6 +143,22 @@ fun MainScreen(
                 )
                 if (status?.ignoringBatteryOptimizations == false) {
                     TextButton(onClick = { context.startActivity(SystemIntents.requestIgnoreBatteryOptimizations(context)) }) { Text(stringResource(R.string.main_fix)) }
+                }
+                StatusRow(
+                    stringResource(R.string.main_location),
+                    stringResource(
+                        when {
+                            status?.backgroundLocationGranted == true -> R.string.main_location_background
+                            status?.locationGranted == true -> R.string.main_location_foreground
+                            else -> R.string.main_denied
+                        },
+                    ),
+                    ok = status?.locationGranted == true,
+                )
+                if (status?.locationGranted == false) {
+                    TextButton(onClick = {
+                        requestLocation.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                    }) { Text(stringResource(R.string.main_fix)) }
                 }
             }
 

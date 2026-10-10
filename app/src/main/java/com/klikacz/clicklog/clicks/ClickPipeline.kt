@@ -31,6 +31,7 @@ class ClickPipeline @Inject constructor(
     keySource: KeyEventClickSource,
     intentSource: IntentClickSource,
     private val logger: com.klikacz.clicklog.diagnostics.DiagnosticLogger,
+    private val locationTagger: com.klikacz.clicklog.location.LocationTagger,
 ) {
     val processor = ClickProcessor(
         scope = scope,
@@ -66,6 +67,7 @@ class ClickPipeline @Inject constructor(
             processor.stored.collect {
                 Timber.d("Click stored id=%d", it.id)
                 logger.logClick(it.wallTimeMs, it.source.name, accepted = true, storedId = it.id)
+                locationTagger.tag(it)
             }
         }
     }

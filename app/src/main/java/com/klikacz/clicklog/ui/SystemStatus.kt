@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings as SystemSettings
 import androidx.core.content.ContextCompat
+import com.klikacz.clicklog.location.LocationTagger
 import com.klikacz.clicklog.service.ClickAccessibilityService
 
 /** Snapshot of system-level prerequisites shown on the main screen (spec §2.2). */
@@ -16,6 +17,8 @@ data class SystemStatus(
     val accessibilityEnabled: Boolean,
     val notificationsGranted: Boolean,
     val ignoringBatteryOptimizations: Boolean,
+    val locationGranted: Boolean,
+    val backgroundLocationGranted: Boolean,
 ) {
     companion object {
         fun check(context: Context): SystemStatus {
@@ -27,6 +30,8 @@ data class SystemStatus(
                 accessibilityEnabled = ClickAccessibilityService.isEnabled(context),
                 notificationsGranted = notifications,
                 ignoringBatteryOptimizations = pm.isIgnoringBatteryOptimizations(context.packageName),
+                locationGranted = LocationTagger.hasPermission(context),
+                backgroundLocationGranted = LocationTagger.hasBackgroundPermission(context),
             )
         }
     }

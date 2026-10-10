@@ -62,6 +62,17 @@ fun EventsScreen(viewModel: EventsViewModel, onBack: () -> Unit) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+                        val lat = c.latitude
+                        val lon = c.longitude
+                        Text(
+                            if (lat != null && lon != null) {
+                                String.format(java.util.Locale.US, "%.5f, %.5f", lat, lon) +
+                                    (c.locationAccuracyM?.let { "  ±" + it.toInt() + " m" } ?: "") +
+                                    (c.locationProvider?.let { "  (" + it + ")" } ?: "")
+                            } else stringResource(R.string.events_no_location),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                     HorizontalDivider()
                 }

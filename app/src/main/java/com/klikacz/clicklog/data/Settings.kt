@@ -53,6 +53,8 @@ data class AppSettings(
     val serviceEnabled: Boolean,
     val diagnosticsMode: Boolean,
     val vibrateOnClick: Boolean,
+    /** Attach a rough location to each click (requires the location permission). */
+    val saveLocation: Boolean,
 ) {
     /** Path that is actually used for capturing clicks right now. */
     val effectivePath: ClickSourceType?
@@ -99,6 +101,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         val SERVICE_ENABLED = booleanPreferencesKey("service_enabled")
         val DIAGNOSTICS_MODE = booleanPreferencesKey("diagnostics_mode")
         val VIBRATE = booleanPreferencesKey("vibrate_on_click")
+        val SAVE_LOCATION = booleanPreferencesKey("save_location")
     }
 
     private val store get() = context.settingsDataStore
@@ -137,6 +140,8 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
     suspend fun setServiceEnabled(enabled: Boolean) = store.edit { it[Keys.SERVICE_ENABLED] = enabled }
 
     suspend fun setDiagnosticsMode(enabled: Boolean) = store.edit { it[Keys.DIAGNOSTICS_MODE] = enabled }
+
+    suspend fun setSaveLocation(enabled: Boolean) = store.edit { it[Keys.SAVE_LOCATION] = enabled }
 
     suspend fun setVibrateOnClick(enabled: Boolean) = store.edit { it[Keys.VIBRATE] = enabled }
 
@@ -177,6 +182,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
             serviceEnabled = this[Keys.SERVICE_ENABLED] ?: false,
             diagnosticsMode = this[Keys.DIAGNOSTICS_MODE] ?: false,
             vibrateOnClick = this[Keys.VIBRATE] ?: true,
+            saveLocation = this[Keys.SAVE_LOCATION] ?: true,
         )
     }
 }

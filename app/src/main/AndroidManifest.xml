@@ -7,6 +7,11 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Rough location attached to each click (user request; coarse is enough, fine is optional). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <!-- Spec §5: the app must keep logging with the screen off; background logging is its core function. -->
     <uses-permission
         android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
@@ -35,7 +40,7 @@
         </activity>
 
         <!--
-            Path B target (spec §4). Exported with its own LAUNCHER entry ("ClickLog – przycisk")
+            Path B target (spec §4). Exported with its own LAUNCHER entry ("ClickLog – button")
             because the vendor "Programmable Key" picker typically lists launcher activities.
             Invisible, finishes in onCreate, never shows in recents.
         -->
@@ -62,7 +67,7 @@
         <service
             android:name=".service.ClickLogService"
             android:exported="false"
-            android:foregroundServiceType="specialUse">
+            android:foregroundServiceType="specialUse|location">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Logging hardware SOS button presses with precise timestamps; must run with the screen off." />
