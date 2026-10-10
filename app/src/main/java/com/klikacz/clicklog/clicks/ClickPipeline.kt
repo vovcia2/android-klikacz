@@ -30,6 +30,7 @@ class ClickPipeline @Inject constructor(
     private val repository: ClickRepository,
     keySource: KeyEventClickSource,
     intentSource: IntentClickSource,
+    private val logger: com.klikacz.clicklog.diagnostics.DiagnosticLogger,
 ) {
     val processor = ClickProcessor(
         scope = scope,
@@ -52,8 +53,9 @@ class ClickPipeline @Inject constructor(
         scope.launch {
             merge(keySource.clicks, intentSource.clicks).collect { raw ->
                 val accepted = processor.offer(raw)
+                logger.logClick(raw.wallTimeMs, raw.source.name, accepted != null)
                 if (accepted == null) {
-                    Timber.d("Click debounced: %s", raw)
+                    Timber.d("Click absorbed: %s", raw)
                 } else {
                     Timber.i("Click accepted: %s", accepted)
                     if (config.current.vibrateOnClick) vibrate()
@@ -61,7 +63,10 @@ class ClickPipeline @Inject constructor(
             }
         }
         scope.launch {
-            processor.stored.collect { Timber.d("Click stored id=%d", it.id) }
+            processor.stored.collect {
+                Timber.d("Click stored id=%d", it.id)
+                logger.logClick(it.wallTimeMs, it.source.name, accepted = true, storedId = it.id)
+            }
         }
     }
 

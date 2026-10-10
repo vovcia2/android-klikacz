@@ -111,7 +111,7 @@ class SetupWizardViewModel @Inject constructor(
         }
         testJobs += viewModelScope.launch {
             dao.observeSince(start).collect { events ->
-                val relevant = events.filter { it.channel != DiagnosticChannel.APP }
+                val relevant = events.filter { it.channel != DiagnosticChannel.APP && it.channel != DiagnosticChannel.CLICK }
                 val presses = PathSelector.pressCount(relevant)
                 _state.update { it.copy(liveEvents = relevant.asReversed(), pressCount = presses) }
                 if (presses >= WizardState.BUTTON_TEST_PRESSES) finishButtonTest(relevant)
@@ -152,7 +152,7 @@ class SetupWizardViewModel @Inject constructor(
         val keycode = _state.value.decision?.keycode
         testJobs += viewModelScope.launch {
             dao.observeSince(start).collect { events ->
-                val relevant = events.filter { it.channel != DiagnosticChannel.APP }
+                val relevant = events.filter { it.channel != DiagnosticChannel.APP && it.channel != DiagnosticChannel.CLICK }
                 val keys = PathSelector.screenOffKeyCount(relevant, keycode)
                 val launches = PathSelector.screenOffLaunchCount(relevant)
                 _state.update {

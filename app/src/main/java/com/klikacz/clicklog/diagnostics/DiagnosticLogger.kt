@@ -84,7 +84,16 @@ class DiagnosticLogger @Inject constructor(
      * Channels that are rare and decisive for diagnosing the device, recorded even outside a
      * capture so a screen-off test can be reconstructed afterwards.
      */
-    private val alwaysLogged = setOf(DiagnosticChannel.LAUNCH_INTENT, DiagnosticChannel.VENDOR_BROADCAST, DiagnosticChannel.APP)
+    private val alwaysLogged = setOf(
+        DiagnosticChannel.LAUNCH_INTENT, DiagnosticChannel.VENDOR_BROADCAST, DiagnosticChannel.APP, DiagnosticChannel.CLICK,
+    )
+
+    /**
+     * Milliseconds the device has spent in deep sleep since boot. The *difference* between two
+     * entries tells whether the device suspended between them (the vendor key handler behaves
+     * differently when the device is awake with the screen off vs. asleep).
+     */
+    private fun asleepMs(): Long = android.os.SystemClock.elapsedRealtime() - android.os.SystemClock.uptimeMillis()
 
     fun log(entity: DiagnosticEntity) {
         Timber.tag("DIAG").i(
@@ -101,7 +110,7 @@ class DiagnosticLogger @Inject constructor(
             DiagnosticEntity(
                 tsMs = System.currentTimeMillis(),
                 channel = DiagnosticChannel.APP,
-                extrasJson = JSONObject().put("note", text).toString(),
+                extrasJson = JSONObject().put("note", text).put("asleepMs", asleepMs()).toString(),
                 screenOn = isScreenOn(),
             ),
         )
@@ -119,6 +128,7 @@ class DiagnosticLogger @Inject constructor(
             put("eventTime", event.eventTime)
             put("downTime", event.downTime)
             put("keyName", KeyEvent.keyCodeToString(event.keyCode))
+            put("asleepMs", asleepMs())
             extra.forEach { (k, v) -> put(k, v) }
         }
         log(
@@ -147,6 +157,7 @@ class DiagnosticLogger @Inject constructor(
             put("package", intent?.`package`)
             put("extras", bundleToJson(intent?.extras))
             put("keyguardLocked", isKeyguardLocked())
+            put("asleepMs", asleepMs())
             extra.forEach { (k, v) -> put(k, v) }
         }
         log(
@@ -158,6 +169,16 @@ class DiagnosticLogger @Inject constructor(
                 screenOn = isScreenOn(),
             ),
         )
+    }
+
+    /** Records what the click processor did with a raw click (always logged). */
+    fun logClick(wallTimeMs: Long, source: String, accepted: Boolean, storedId: Long? = null) {
+        val json = JSONObject()
+            .put("source", source)
+            .put("result", if (accepted) "accepted" else "absorbed")
+            .put("storedId", storedId)
+            .put("asleepMs", asleepMs())
+        log(DiagnosticEntity(tsMs = wallTimeMs, channel = DiagnosticChannel.CLICK, extrasJson = json.toString(), screenOn = isScreenOn()))
     }
 
     private fun bundleToJson(bundle: Bundle?): JSONObject? {

@@ -48,6 +48,16 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
    budzi ekran (uruchomienie), kolejne przychodzą jako 141. Kreator (krok 3 „wykonaj gest
    3 razy”) wybiera keycode 141 dla gestu podwójnego. W tym teście usługa dostępności była
    wyłączona (brak wpisów ACCESSIBILITY_KEY) – po reinstalacji trzeba ją włączyć ponownie.
+   Log z v0.1.11 (2026-10-10 09:54–09:59): przy podwójnym naciśnięciu system dostarcza gest
+   zależnie od stanu urządzenia: ekran zgaszony po uśpieniu → uruchomienie aplikacji;
+   ekran włączony, ClickLog na wierzchu → 291×2 + uruchomienie albo pojedynczy F11;
+   ekran włączony, ClickLog w tle → F11 + uruchomienie; **ekran zgaszony, ale urządzenie
+   jeszcze nie uśpione (kilka sekund po zgaszeniu) → nic nie dociera** (prawdopodobnie
+   wstrzyknięty F11, którego system przy zgaszonym ekranie nie przekazuje aplikacjom ani usłudze
+   dostępności). W kroku 4 kreatora naciśnięcia co ~13 s dały 3/3. Od v0.1.12 każdy wpis ma
+   `asleepMs` (czas głębokiego snu od startu; różnica między wpisami = czy urządzenie spało),
+   a każde policzone kliknięcie ma wiersz `CLICK`. Eksperyment: zgaś ekran, odczekaj 15 s,
+   podwójne naciśnięcie – jeśli dociera, regułą jest uśpienie urządzenia.
    Keycode: **291** (vendor: `KEYCODE_MACRO1_ON`), scancode: **183**, urządzenie wejściowe:
    `gpio_keys` (deviceId 9, source 0x101). Krótkie naciśnięcie trwa ok. 180 ms
    (DOWN→UP), więc domyślny debounce 150 ms nie zjada naciśnięć.

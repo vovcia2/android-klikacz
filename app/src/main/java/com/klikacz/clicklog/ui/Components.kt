@@ -52,10 +52,10 @@ fun DiagnosticRow(e: DiagnosticEntity, screenOffLabel: String) {
                 "${e.action} keycode=${e.keycode} scancode=${e.scancode}"
             DiagnosticChannel.LAUNCH_INTENT, DiagnosticChannel.MAIN_INTENT, DiagnosticChannel.VENDOR_BROADCAST ->
                 "intent=${e.intentAction}"
-            DiagnosticChannel.APP -> e.extrasJson ?: ""
+            DiagnosticChannel.APP, DiagnosticChannel.CLICK -> e.extrasJson ?: ""
         }
         Text(summary + if (!e.screenOn) "  [$screenOffLabel]" else "", style = MaterialTheme.typography.bodySmall)
-        if (e.channel != DiagnosticChannel.APP && !e.extrasJson.isNullOrBlank()) {
+        if (e.channel != DiagnosticChannel.APP && e.channel != DiagnosticChannel.CLICK && !e.extrasJson.isNullOrBlank()) {
             Text(e.extrasJson, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3)
         }
     }

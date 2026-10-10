@@ -26,6 +26,9 @@ enum class DiagnosticChannel {
 
     /** Marker written by the app itself (test start/end, notes). */
     APP,
+
+    /** A click the processor accepted (stored) or absorbed into the previous gesture. */
+    CLICK,
 }
 
 /** Raw diagnostic record (spec §3.2 `diagnostic_log`). */
