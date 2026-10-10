@@ -27,7 +27,7 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
 | 7 | Debounce | Ustawić 1000 ms, kliknąć 2× w ciągu 0,5 s | Zarejestrowane 1 kliknięcie | |
 | 8 | Nowa sesja | Ustawienia → Nowa sesja | Licznik = 0, nowy `session_id`, stare wpisy w „Eksport CSV (wszystkie sesje)” | |
 | 9 | Optymalizacja baterii | Główny ekran → „Napraw” przy optymalizacji baterii | Systemowy dialog; po zgodzie status „wyłączona (OK)” | |
-| 10 | Test ekranu zgaszonego w kreatorze | Krok 4 kreatora, naciśnięcia co ok. 2 s | Licznik pokazuje liczbę naciśnięć przy zgaszonym ekranie; w wyniku „Działa przy zgaszonym ekranie: tak” | ⚠️ 2026-10-10, v0.1.5: 1/3 – wszystkie jako LAUNCH_INTENT z `com.bullitt.wave`, zero KeyEvent. Prawdopodobna przyczyna: 3 szybkie naciśnięcia = 1 gest podwójny po stronie systemu. Poprawki w v0.1.7 (onNewIntent, bez singleInstance, uruchomienia liczone zawsze) i v0.1.8 (ustawienie „Gest: podwójne naciśnięcie”) – powtórzyć z gestem przypisanym w systemie |
+| 10 | Test ekranu zgaszonego w kreatorze | Krok 4 kreatora, naciśnięcia co ok. 2 s | Licznik pokazuje liczbę naciśnięć przy zgaszonym ekranie; w wyniku „Działa przy zgaszonym ekranie: tak” | ⚠️ 2026-10-10, v0.1.5: 1/3 – wszystkie jako LAUNCH_INTENT z `com.bullitt.wave`, zero KeyEvent. Prawdopodobna przyczyna: 3 szybkie naciśnięcia = 1 gest podwójny po stronie systemu. Poprawki w v0.1.7 (onNewIntent, bez singleInstance, uruchomienia liczone zawsze) i v0.1.8 (ustawienie „Gest: podwójne naciśnięcie”). v0.1.7–v0.1.8: crash `LaunchReceiverActivity` (Theme.NoDisplay bez natychmiastowego finish) – naprawione w v0.1.9. Powtórzyć z gestem przypisanym w systemie |
 
 ## Otwarte pytania (§11) — do ustalenia kreatorem
 
