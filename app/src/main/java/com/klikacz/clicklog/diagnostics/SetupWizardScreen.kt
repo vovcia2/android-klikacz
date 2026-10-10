@@ -151,6 +151,9 @@ private fun StepScreenOff(state: WizardState, onStart: () -> Unit, onFinish: () 
             }
         } else {
             Text(stringResource(R.string.wizard_step4_count, state.screenOffCount), style = MaterialTheme.typography.titleLarge)
+            if (state.screenOffCount > 0) {
+                Text(stringResource(R.string.wizard_step4_breakdown, state.screenOffKeyCount, state.screenOffLaunchCount), style = MaterialTheme.typography.bodySmall)
+            }
             if (state.screenOffRunning) {
                 Button(onClick = onFinish, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.finish)) }
             } else {
@@ -190,6 +193,12 @@ private fun StepResult(state: WizardState) {
                 },
             ),
         )
+        if (state.worksScreenOff == true) {
+            Text(stringResource(R.string.wizard_step4_breakdown, state.screenOffKeyCount, state.screenOffLaunchCount), style = MaterialTheme.typography.bodySmall)
+            if (state.screenOffLaunchCount > 0 && state.screenOffKeyCount == 0) {
+                Text(stringResource(R.string.wizard_result_screen_off_via_launch), style = MaterialTheme.typography.bodySmall)
+            }
+        }
         if (decision != null) DecisionSummary(decision)
         if (decision?.path == ClickSourceType.LAUNCH_INTENT) {
             Text(stringResource(R.string.wizard_result_hint_b), style = MaterialTheme.typography.bodySmall)

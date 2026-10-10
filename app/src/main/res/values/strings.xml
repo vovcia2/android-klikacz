@@ -28,10 +28,11 @@
     <string name="save_file">Zapisz plik</string>
 
     <!-- Paths -->
-    <string name="path_a">A – KEY_EVENT (usługa dostępności)</string>
+    <string name="path_a">A – KEY_EVENT (usługa dostępności) + uruchomienia</string>
     <string name="path_b">B – LAUNCH_INTENT (uruchomienie aplikacji)</string>
     <string name="path_none">brak (nie wykryto)</string>
     <string name="path_mode_auto">AUTO (wynik kreatora)</string>
+    <string name="path_launch_note">Uruchomienia „ClickLog – przycisk” są liczone zawsze, niezależnie od ścieżki.</string>
 
     <!-- Main screen -->
     <string name="main_title">ClickLog</string>
@@ -77,6 +78,8 @@
     <string name="settings_export_csv_all">Eksport CSV (wszystkie sesje)</string>
     <string name="settings_debounce">Okno debounce (ms)</string>
     <string name="settings_debounce_hint">Kolejne naciśnięcie szybciej niż to okno jest ignorowane (auto-repeat).</string>
+    <string name="settings_merge">Okno łączenia źródeł (ms)</string>
+    <string name="settings_merge_hint">To samo naciśnięcie może dotrzeć dwa razy: jako KeyEvent i jako uruchomienie aplikacji. Zdarzenie z drugiego źródła w tym oknie po poprzednim jest liczone jako to samo kliknięcie.</string>
     <string name="settings_path">Ścieżka przechwytywania</string>
     <string name="settings_diagnostics_mode">Tryb diagnostyki (zapisuj wszystkie zdarzenia do logu)</string>
     <string name="settings_vibrate">Wibracja przy zarejestrowanym kliknięciu</string>
@@ -117,7 +120,9 @@
     <string name="wizard_checklist_accessibility">• Czy usługa dostępności ClickLog jest włączona?</string>
     <string name="wizard_checklist_sos">• Czy domyślna akcja SOS została wyłączona?</string>
     <string name="wizard_step4_title">4. Test przy zgaszonym ekranie</string>
-    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania, naciśnij przycisk SOS 3 razy, a potem odblokuj telefon i wróć tutaj. Aplikacja policzy, ile naciśnięć zarejestrowano w tym czasie.</string>
+    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania, naciśnij przycisk SOS 3 razy w odstępach ok. 2 s (system może zapalić ekran po pierwszym naciśnięciu – to normalne), a potem odblokuj telefon i wróć tutaj. Aplikacja policzy, ile naciśnięć zarejestrowano w tym czasie.</string>
+    <string name="wizard_step4_breakdown">W tym jako KeyEvent: %1$d, jako uruchomienie aplikacji: %2$d</string>
+    <string name="wizard_result_screen_off_via_launch">Przy zgaszonym ekranie system nie dostarcza KeyEvent – uruchamia aplikację. Takie uruchomienia są zawsze liczone jako kliknięcia (bez znacznika czasu jądra, ekran się budzi).</string>
     <string name="wizard_step4_count">Zarejestrowano przy zgaszonym ekranie: %1$d</string>
     <string name="wizard_step4_start">Rozpocznij test</string>
     <string name="wizard_step4_skip_no_path">Pomiń (nie wykryto ścieżki)</string>

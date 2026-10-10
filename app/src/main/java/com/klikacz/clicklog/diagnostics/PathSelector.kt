@@ -109,12 +109,14 @@ object PathSelector {
      * events with `screen_on = false` (restricted to [keycode] when known) plus launch intents,
      * which arrive regardless of screen state.
      */
-    fun screenOffPressCount(events: List<DiagnosticEntity>, keycode: Int?): Int {
-        val asDown = events.count {
-            it.channel == DiagnosticChannel.ACCESSIBILITY_KEY && it.isKeyDown && !it.screenOn &&
-                (keycode == null || it.keycode == keycode)
-        }
-        val launches = events.count { it.channel == DiagnosticChannel.LAUNCH_INTENT || it.channel == DiagnosticChannel.MAIN_INTENT }
-        return asDown + launches
+    fun screenOffPressCount(events: List<DiagnosticEntity>, keycode: Int?): Int =
+        screenOffKeyCount(events, keycode) + screenOffLaunchCount(events)
+
+    fun screenOffKeyCount(events: List<DiagnosticEntity>, keycode: Int?): Int = events.count {
+        it.channel == DiagnosticChannel.ACCESSIBILITY_KEY && it.isKeyDown && !it.screenOn &&
+            (keycode == null || it.keycode == keycode)
     }
+
+    fun screenOffLaunchCount(events: List<DiagnosticEntity>): Int =
+        events.count { it.channel == DiagnosticChannel.LAUNCH_INTENT || it.channel == DiagnosticChannel.MAIN_INTENT }
 }

@@ -1,6 +1,6 @@
 package com.klikacz.clicklog.clicks
 
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
 
 /** Capture path (spec §4). A = KEY_EVENT, B = LAUNCH_INTENT. */
 enum class ClickSourceType(val letter: String) {
@@ -24,8 +24,13 @@ data class RawClick(
     val source: ClickSourceType,
 )
 
-/** Common interface of the two capture paths (spec §4 "wspólny interfejs ClickSource"). */
+/**
+ * Common interface of the two capture paths (spec §4 "wspólny interfejs ClickSource").
+ *
+ * [clicks] is backed by a buffered channel: a click produced before the pipeline has started
+ * collecting (e.g. a cold start of the process by a key launch) is kept, not dropped.
+ */
 interface ClickSource {
     val type: ClickSourceType
-    val clicks: SharedFlow<RawClick>
+    val clicks: Flow<RawClick>
 }

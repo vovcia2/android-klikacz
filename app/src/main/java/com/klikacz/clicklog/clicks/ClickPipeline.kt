@@ -9,6 +9,8 @@ import com.klikacz.clicklog.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import com.klikacz.clicklog.data.ClickEntity
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -35,7 +37,11 @@ class ClickPipeline @Inject constructor(
         debounceMs = { config.current.debounceMs },
         sessionId = { config.current.sessionId },
         persist = repository::insert,
+        crossSourceMergeMs = { config.current.crossSourceMergeMs },
     )
+
+    /** Clicks after they have been written to the database. */
+    val stored: SharedFlow<ClickEntity> get() = processor.stored
 
     private val vibrator: Vibrator? by lazy {
         (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)?.defaultVibrator

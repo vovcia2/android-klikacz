@@ -27,7 +27,7 @@ class ClickProcessorTest {
      * The processor's consumer coroutine runs on the test scheduler under a job we cancel at the
      * end of each test; `backgroundScope` is not driven by `advanceUntilIdle`.
      */
-    private class Harness(scope: TestScope, debounce: Int = 150) {
+    private class Harness(scope: TestScope, debounce: Int = 150, merge: Int = 600) {
         val persisted = mutableListOf<ClickEntity>()
         private var nextId = 1L
         private val job = SupervisorJob()
@@ -37,13 +37,14 @@ class ClickProcessorTest {
             debounceMs = { debounce },
             sessionId = { 42L },
             persist = { e -> e.copy(id = nextId++).also { persisted += it } },
+            crossSourceMergeMs = { merge },
         )
 
         fun close() = job.cancel()
     }
 
-    private fun harnessTest(debounce: Int = 150, body: suspend TestScope.(Harness) -> Unit) = runTest {
-        val h = Harness(this, debounce)
+    private fun harnessTest(debounce: Int = 150, merge: Int = 600, body: suspend TestScope.(Harness) -> Unit) = runTest {
+        val h = Harness(this, debounce, merge)
         try {
             body(h)
         } finally {
@@ -138,5 +139,61 @@ class ClickProcessorTest {
         assertNotNull(h.processor.offer(key(1_500)))
         advanceUntilIdle()
         assertEquals(2, h.persisted.size)
+    }
+
+    // ---- cross-source merge ---------------------------------------------------------------
+
+    @Test
+    fun `launch 400 ms after a key event is the same press and is merged`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNull(h.processor.offer(intent(1_400)))
+        advanceUntilIdle()
+        assertEquals(1, h.persisted.size)
+        assertEquals(ClickSourceType.KEY_EVENT, h.persisted.single().source)
+    }
+
+    @Test
+    fun `key event 400 ms after a launch is merged too`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(intent(1_000)))
+        assertNull(h.processor.offer(key(1_400)))
+        advanceUntilIdle()
+        assertEquals(1, h.persisted.size)
+        assertEquals(ClickSourceType.LAUNCH_INTENT, h.persisted.single().source)
+    }
+
+    @Test
+    fun `launch 600 ms after a key event is a new press`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNotNull(h.processor.offer(intent(1_600)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    @Test
+    fun `same-source clicks 400 ms apart are not merged, only debounced`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(intent(1_000)))
+        assertNotNull(h.processor.offer(intent(1_400)))
+        assertNotNull(h.processor.offer(key(2_000)))
+        assertNotNull(h.processor.offer(key(2_400)))
+        advanceUntilIdle()
+        assertEquals(4, h.persisted.size)
+    }
+
+    @Test
+    fun `merge window of zero disables merging`() = harnessTest(merge = 0) { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNotNull(h.processor.offer(intent(1_200)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    @Test
+    fun `screen-off sequence of launches only is counted in full`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(intent(1_000)))
+        assertNotNull(h.processor.offer(intent(3_000)))
+        assertNotNull(h.processor.offer(intent(5_000)))
+        advanceUntilIdle()
+        assertEquals(3, h.persisted.size)
+        assertEquals(listOf<Long?>(null, null, null), h.persisted.map { it.uptimeMs })
     }
 }

@@ -37,6 +37,8 @@ data class DiagnosisResult(
 data class AppSettings(
     val sessionId: Long,
     val debounceMs: Int,
+    /** Window in which a KeyEvent click and an app-launch click count as one press. */
+    val crossSourceMergeMs: Int,
     val pathMode: PathMode,
     val diagnosis: DiagnosisResult?,
     val wizardCompleted: Boolean,
@@ -57,6 +59,7 @@ data class AppSettings(
 
     companion object {
         const val DEFAULT_DEBOUNCE_MS = 150
+        const val DEFAULT_CROSS_SOURCE_MERGE_MS = 600
         const val MIN_DEBOUNCE_MS = 0
         const val MAX_DEBOUNCE_MS = 2000
     }
@@ -70,6 +73,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
     private object Keys {
         val SESSION_ID = longPreferencesKey("session_id")
         val DEBOUNCE_MS = intPreferencesKey("debounce_ms")
+        val CROSS_SOURCE_MERGE_MS = intPreferencesKey("cross_source_merge_ms")
         val PATH_MODE = stringPreferencesKey("path_mode")
         val DIAG_PATH = stringPreferencesKey("diag_path")
         val DIAG_KEYCODE = intPreferencesKey("diag_keycode")
@@ -105,6 +109,11 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
     suspend fun setDebounceMs(value: Int) {
         val clamped = value.coerceIn(AppSettings.MIN_DEBOUNCE_MS, AppSettings.MAX_DEBOUNCE_MS)
         store.edit { it[Keys.DEBOUNCE_MS] = clamped }
+    }
+
+    suspend fun setCrossSourceMergeMs(value: Int) {
+        val clamped = value.coerceIn(AppSettings.MIN_DEBOUNCE_MS, AppSettings.MAX_DEBOUNCE_MS)
+        store.edit { it[Keys.CROSS_SOURCE_MERGE_MS] = clamped }
     }
 
     suspend fun setPathMode(mode: PathMode) = store.edit { it[Keys.PATH_MODE] = mode.name }
@@ -144,6 +153,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         return AppSettings(
             sessionId = this[Keys.SESSION_ID] ?: 0L,
             debounceMs = this[Keys.DEBOUNCE_MS] ?: AppSettings.DEFAULT_DEBOUNCE_MS,
+            crossSourceMergeMs = this[Keys.CROSS_SOURCE_MERGE_MS] ?: AppSettings.DEFAULT_CROSS_SOURCE_MERGE_MS,
             pathMode = this[Keys.PATH_MODE]?.let { runCatching { PathMode.valueOf(it) }.getOrNull() } ?: PathMode.AUTO,
             diagnosis = diagnosis,
             wizardCompleted = this[Keys.WIZARD_COMPLETED] ?: false,

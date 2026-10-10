@@ -41,6 +41,9 @@ data class WizardState(
     val screenOffRunning: Boolean = false,
     val screenOffStartMs: Long? = null,
     val screenOffCount: Int = 0,
+    /** How many of [screenOffCount] arrived as KeyEvents vs. app launches. */
+    val screenOffKeyCount: Int = 0,
+    val screenOffLaunchCount: Int = 0,
     val screenOffEvents: List<DiagnosticEntity> = emptyList(),
     val worksScreenOff: Boolean? = null,
     // Step 5
@@ -140,13 +143,26 @@ class SetupWizardViewModel @Inject constructor(
         val start = System.currentTimeMillis()
         logger.note("Screen-off test start")
         beginCapture()
-        _state.update { it.copy(screenOffRunning = true, screenOffStartMs = start, screenOffCount = 0, screenOffEvents = emptyList(), worksScreenOff = null) }
+        _state.update {
+            it.copy(
+                screenOffRunning = true, screenOffStartMs = start, screenOffCount = 0,
+                screenOffKeyCount = 0, screenOffLaunchCount = 0, screenOffEvents = emptyList(), worksScreenOff = null,
+            )
+        }
         val keycode = _state.value.decision?.keycode
         testJobs += viewModelScope.launch {
             dao.observeSince(start).collect { events ->
                 val relevant = events.filter { it.channel != DiagnosticChannel.APP }
-                val count = PathSelector.screenOffPressCount(relevant, keycode)
-                _state.update { it.copy(screenOffEvents = relevant.asReversed(), screenOffCount = count) }
+                val keys = PathSelector.screenOffKeyCount(relevant, keycode)
+                val launches = PathSelector.screenOffLaunchCount(relevant)
+                _state.update {
+                    it.copy(
+                        screenOffEvents = relevant.asReversed(),
+                        screenOffCount = keys + launches,
+                        screenOffKeyCount = keys,
+                        screenOffLaunchCount = launches,
+                    )
+                }
             }
         }
     }

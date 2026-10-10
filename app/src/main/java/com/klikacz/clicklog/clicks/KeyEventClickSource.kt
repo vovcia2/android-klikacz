@@ -1,9 +1,9 @@
 package com.klikacz.clicklog.clicks
 
 import android.view.KeyEvent
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,8 +21,8 @@ class KeyEventClickSource @Inject constructor(
 
     override val type = ClickSourceType.KEY_EVENT
 
-    private val _clicks = MutableSharedFlow<RawClick>(extraBufferCapacity = 64)
-    override val clicks: SharedFlow<RawClick> = _clicks.asSharedFlow()
+    private val channel = Channel<RawClick>(Channel.UNLIMITED)
+    override val clicks: Flow<RawClick> = channel.receiveAsFlow()
 
     /**
      * @return true if the event belongs to the configured button and should be consumed so the
@@ -41,7 +41,7 @@ class KeyEventClickSource @Inject constructor(
                 monotonicMs = eventTimeUptimeMs,
                 source = type,
             )
-            if (!_clicks.tryEmit(click)) Timber.w("KeyEventClickSource buffer full, dropping click")
+            if (channel.trySend(click).isFailure) Timber.w("KeyEventClickSource channel closed, dropping click")
         }
         // Consume both DOWN and UP of the configured key.
         return true

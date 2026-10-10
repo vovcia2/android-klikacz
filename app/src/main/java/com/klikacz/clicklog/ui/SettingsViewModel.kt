@@ -46,6 +46,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setDebounce(ms: Int) = viewModelScope.launch { settings.setDebounceMs(ms) }
+    fun setCrossSourceMerge(ms: Int) = viewModelScope.launch { settings.setCrossSourceMergeMs(ms) }
     fun setPathMode(mode: PathMode) = viewModelScope.launch { settings.setPathMode(mode) }
     fun setDiagnosticsMode(on: Boolean) = viewModelScope.launch { settings.setDiagnosticsMode(on) }
     fun setVibrate(on: Boolean) = viewModelScope.launch { settings.setVibrateOnClick(on) }

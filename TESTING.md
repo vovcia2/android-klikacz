@@ -27,13 +27,17 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
 | 7 | Debounce | Ustawić 1000 ms, kliknąć 2× w ciągu 0,5 s | Zarejestrowane 1 kliknięcie | |
 | 8 | Nowa sesja | Ustawienia → Nowa sesja | Licznik = 0, nowy `session_id`, stare wpisy w „Eksport CSV (wszystkie sesje)” | |
 | 9 | Optymalizacja baterii | Główny ekran → „Napraw” przy optymalizacji baterii | Systemowy dialog; po zgodzie status „wyłączona (OK)” | |
-| 10 | Test ekranu zgaszonego w kreatorze | Krok 4 kreatora | Licznik pokazuje liczbę naciśnięć przy zgaszonym ekranie; w wyniku „Działa przy zgaszonym ekranie: tak” | |
+| 10 | Test ekranu zgaszonego w kreatorze | Krok 4 kreatora, naciśnięcia co ok. 2 s | Licznik pokazuje liczbę naciśnięć przy zgaszonym ekranie; w wyniku „Działa przy zgaszonym ekranie: tak” | ⚠️ 2026-10-10, v0.1.5: 1/3 – wszystkie jako LAUNCH_INTENT z `com.bullitt.wave`, zero KeyEvent. Poprawka w v0.1.8+ (onNewIntent, bez singleInstance, uruchomienia liczone zawsze) – powtórzyć |
 
 ## Otwarte pytania (§11) — do ustalenia kreatorem
 
 1. Czy *Programmable Key* pozwala przypisać dowolną aplikację (ścieżka B)? Wynik: ______
    (nieistotne, dopóki działa ścieżka A)
-2. Czy `AccessibilityService` widzi klawisz SOS (ścieżka A)? **Tak** (2026-10-10, v0.1.5).
+2. Czy `AccessibilityService` widzi klawisz SOS (ścieżka A)? **Tak, ale tylko przy włączonym
+   ekranie** (2026-10-10, v0.1.5). Przy zgaszonym ekranie klawisz nie trafia do usługi
+   dostępności; zamiast tego `com.bullitt.wave` (referrer `android-app://android`, flagi
+   `NEW_TASK|EXCLUDE_FROM_RECENTS`) uruchamia `LaunchReceiverActivity`. Stąd tryb hybrydowy:
+   KeyEvent przy włączonym ekranie + uruchomienie aplikacji przy zgaszonym.
    Keycode: **291** (vendor: `KEYCODE_MACRO1_ON`), scancode: **183**, urządzenie wejściowe:
    `gpio_keys` (deviceId 9, source 0x101). Krótkie naciśnięcie trwa ok. 180 ms
    (DOWN→UP), więc domyślny debounce 150 ms nie zjada naciśnięć.

@@ -85,8 +85,8 @@ class MainActivity : ComponentActivity() {
         if (cfg.effectivePath == ClickSourceType.LAUNCH_INTENT && wanted != null && referrer == wanted) {
             val home = SystemIntents.homeLauncherPackage(this)
             if (home == null || !referrer.contains(home)) {
-                val registered = intentSource.onLaunch(wallMs, uptimeMs)
-                Timber.i("MainActivity launch counted as click (referrer=%s) registered=%s", referrer, registered)
+                intentSource.onLaunch(wallMs, uptimeMs)
+                Timber.i("MainActivity launch counted as click (referrer=%s)", referrer)
             }
         }
     }

@@ -13,6 +13,11 @@ import kotlinx.coroutines.withContext
 /**
  * Debounces raw clicks and persists them in order (spec §2.1, §5).
  *
+ * Two windows apply, both on the uptime clock:
+ *  - [debounceMs]: a click closer than this to the last accepted click is auto-repeat/bounce;
+ *  - [crossSourceMergeMs]: a click from the *other* source closer than this to the last accepted
+ *    click is the same physical press seen twice (KeyEvent + app launch) and is merged.
+ *
  * Pure Kotlin so it can be unit-tested: all Android wiring lives in [ClickPipeline].
  *
  * Persistence is sequential: a single consumer coroutine drains an unbounded channel on the
@@ -25,6 +30,7 @@ class ClickProcessor(
     private val debounceMs: () -> Int,
     private val sessionId: () -> Long,
     private val persist: suspend (ClickEntity) -> ClickEntity,
+    private val crossSourceMergeMs: () -> Int = { DEFAULT_CROSS_SOURCE_MERGE_MS },
 ) {
     private val queue = Channel<ClickEntity>(Channel.UNLIMITED)
     private val _stored = MutableSharedFlow<ClickEntity>(extraBufferCapacity = 64)
@@ -34,6 +40,9 @@ class ClickProcessor(
 
     @Volatile
     private var lastAcceptedMonotonicMs: Long? = null
+
+    @Volatile
+    private var lastAcceptedSource: ClickSourceType? = null
 
     init {
         scope.launch {
@@ -51,11 +60,13 @@ class ClickProcessor(
     @Synchronized
     fun offer(raw: RawClick): ClickEntity? {
         val last = lastAcceptedMonotonicMs
-        val window = debounceMs()
-        if (last != null && raw.monotonicMs - last < window) {
-            return null
+        if (last != null) {
+            val since = raw.monotonicMs - last
+            if (since < debounceMs()) return null
+            if (raw.source != lastAcceptedSource && since < crossSourceMergeMs()) return null
         }
         lastAcceptedMonotonicMs = raw.monotonicMs
+        lastAcceptedSource = raw.source
         val entity = ClickEntity(
             sessionId = sessionId(),
             wallTimeMs = raw.wallTimeMs,
@@ -70,9 +81,12 @@ class ClickProcessor(
     @Synchronized
     fun reset() {
         lastAcceptedMonotonicMs = null
+        lastAcceptedSource = null
     }
 
     companion object {
+        const val DEFAULT_CROSS_SOURCE_MERGE_MS = 600
+
         /**
          * Converts a kernel event time (uptime clock) to wall-clock epoch millis:
          * `wall = now_wall - (now_uptime - eventTime)` (spec §2.1).
