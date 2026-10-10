@@ -18,7 +18,7 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
 
 | # | Test | Kroki | Oczekiwane | Wynik |
 |---|---|---|---|---|
-| 1 | Kreator wykrywa przycisk i wybiera ścieżkę | Pierwsze uruchomienie → kroki 1–5 kreatora, w kroku 3 nacisnąć SOS 3× | Krok 3 pokazuje zdarzenia na żywo i podsumowanie z wybraną ścieżką (A lub B) i keycode; wynik zapisany, na ekranie głównym „Aktywna ścieżka” ≠ brak | |
+| 1 | Kreator wykrywa przycisk i wybiera ścieżkę | Pierwsze uruchomienie → kroki 1–5 kreatora, w kroku 3 nacisnąć SOS 3× | Krok 3 pokazuje zdarzenia na żywo i podsumowanie z wybraną ścieżką (A lub B) i keycode; wynik zapisany, na ekranie głównym „Aktywna ścieżka” ≠ brak | ✅ 2026-10-10, v0.1.5: 3/3 naciśnięć, usługa dostępności 3 · Activity 3 · Intenty 0; wybrano ścieżkę A, keycode 291 |
 | 2 | 100 kliknięć przy zgaszonym ekranie | Zgasić ekran, nacisnąć SOS 100× (odstępy > 150 ms), odblokować | Licznik sesji wzrósł dokładnie o 100; lista zdarzeń bez duplikatów (różnice czasu > okno debounce) | |
 | 3 | Odchylenie timestampu < 50 ms (ścieżka A) | Nagrać filmem telefon + zewnętrzny zegar z ms (np. time.is) przy naciśnięciu; porównać `wall_time_ms` z CSV | Różnica < 50 ms | |
 | 4 | Działa po restarcie telefonu | Z włączoną usługą zrestartować telefon, nie otwierać aplikacji, nacisnąć SOS | Notyfikacja usługi wraca po starcie; kliknięcie zarejestrowane | |
@@ -32,4 +32,8 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
 ## Otwarte pytania (§11) — do ustalenia kreatorem
 
 1. Czy *Programmable Key* pozwala przypisać dowolną aplikację (ścieżka B)? Wynik: ______
-2. Czy `AccessibilityService` widzi klawisz SOS (ścieżka A)? Keycode: ______ Scancode: ______
+   (nieistotne, dopóki działa ścieżka A)
+2. Czy `AccessibilityService` widzi klawisz SOS (ścieżka A)? **Tak** (2026-10-10, v0.1.5).
+   Keycode: **291** (vendor: `KEYCODE_MACRO1_ON`), scancode: **183**, urządzenie wejściowe:
+   `gpio_keys` (deviceId 9, source 0x101). Krótkie naciśnięcie trwa ok. 180 ms
+   (DOWN→UP), więc domyślny debounce 150 ms nie zjada naciśnięć.
