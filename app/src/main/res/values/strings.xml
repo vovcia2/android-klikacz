@@ -124,7 +124,7 @@
     <string name="wizard_checklist_accessibility">• Czy usługa dostępności ClickLog jest włączona?</string>
     <string name="wizard_checklist_sos">• Czy domyślna akcja SOS została wyłączona?</string>
     <string name="wizard_step4_title">4. Test przy zgaszonym ekranie</string>
-    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania i wykonaj 3 razy gest przypisany do ClickLog (pojedyncze lub podwójne naciśnięcie SOS) w odstępach ok. 2 s. System może zapalić ekran po pierwszym – to normalne. Potem odblokuj telefon i wróć tutaj. Aplikacja policzy, ile naciśnięć zarejestrowano w tym czasie.</string>
+    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania i wykonaj gest przypisany do ClickLog (pojedyncze lub podwójne naciśnięcie SOS). Odczekaj ok. 3 s. Jeśli ekran się zapalił, zgaś go ponownie przyciskiem zasilania przed kolejnym gestem. Powtórz 3 razy, potem odblokuj telefon i wróć tutaj. Lista poniżej pokaże, co dotarło (uruchomienie aplikacji, KeyEvent) i czy ekran był wtedy zgaszony.</string>
     <string name="wizard_step4_breakdown">W tym jako KeyEvent: %1$d, jako uruchomienie aplikacji: %2$d</string>
     <string name="wizard_result_screen_off_via_launch">Przy zgaszonym ekranie system nie dostarcza KeyEvent – uruchamia aplikację. Takie uruchomienia są zawsze liczone jako kliknięcia (bez znacznika czasu jądra, ekran się budzi).</string>
     <string name="wizard_step4_count">Zarejestrowano przy zgaszonym ekranie: %1$d</string>

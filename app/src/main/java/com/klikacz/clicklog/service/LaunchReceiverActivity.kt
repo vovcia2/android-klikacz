@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.ComponentActivity
-import com.klikacz.clicklog.clicks.ClickConfigProvider
 import com.klikacz.clicklog.clicks.IntentClickSource
 import com.klikacz.clicklog.data.DiagnosticChannel
 import com.klikacz.clicklog.diagnostics.DiagnosticLogger
@@ -28,7 +27,6 @@ class LaunchReceiverActivity : ComponentActivity() {
 
     @Inject lateinit var intentSource: IntentClickSource
     @Inject lateinit var logger: DiagnosticLogger
-    @Inject lateinit var config: ClickConfigProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Capture time before anything else: there is no kernel eventTime on this path.
@@ -52,13 +50,16 @@ class LaunchReceiverActivity : ComponentActivity() {
         val referrer = runCatching { referrer?.toString() }.getOrNull()
         logger.logIntent(
             DiagnosticChannel.LAUNCH_INTENT, intent, tsMs = wallMs,
-            extra = mapOf("referrer" to referrer, "callingPackage" to callingPackage, "via" to via),
+            extra = mapOf(
+                "referrer" to referrer, "callingPackage" to callingPackage, "via" to via,
+                "serviceRunning" to ClickLogService.isRunning.value,
+            ),
         )
         intentSource.onLaunch(wallMs, uptimeMs)
         Timber.i("LaunchReceiverActivity %s wall=%d intent=%s", via, wallMs, intent)
 
-        if (config.current.serviceEnabled && !ClickLogService.isRunning.value) {
-            ClickLogService.start(this)
-        }
+        // Keep the process alive so the click is stored and the next launch is warm. This also
+        // covers the first wizard run, when the service has not been enabled yet.
+        if (!ClickLogService.isRunning.value) ClickLogService.start(this)
     }
 }

@@ -1,5 +1,6 @@
 package com.klikacz.clicklog.diagnostics
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -76,13 +77,22 @@ class DiagnosticLogger @Inject constructor(
 
     fun isScreenOn(): Boolean = powerManager?.isInteractive ?: true
 
+    fun isKeyguardLocked(): Boolean =
+        (context.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager)?.isKeyguardLocked ?: false
+
+    /**
+     * Channels that are rare and decisive for diagnosing the device, recorded even outside a
+     * capture so a screen-off test can be reconstructed afterwards.
+     */
+    private val alwaysLogged = setOf(DiagnosticChannel.LAUNCH_INTENT, DiagnosticChannel.VENDOR_BROADCAST, DiagnosticChannel.APP)
+
     fun log(entity: DiagnosticEntity) {
         Timber.tag("DIAG").i(
             "%s key=%s scan=%s action=%s intent=%s screenOn=%s extras=%s",
             entity.channel, entity.keycode, entity.scancode, entity.action,
             entity.intentAction, entity.screenOn, entity.extrasJson,
         )
-        if (shouldLog) queue.trySend(entity)
+        if (shouldLog || entity.channel in alwaysLogged) queue.trySend(entity)
     }
 
     /** Writes a marker regardless of capture state (used by the wizard to delimit tests). */
@@ -136,6 +146,7 @@ class DiagnosticLogger @Inject constructor(
             put("component", intent?.component?.flattenToShortString())
             put("package", intent?.`package`)
             put("extras", bundleToJson(intent?.extras))
+            put("keyguardLocked", isKeyguardLocked())
             extra.forEach { (k, v) -> put(k, v) }
         }
         log(

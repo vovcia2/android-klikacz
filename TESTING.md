@@ -38,6 +38,10 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
    dostępności; zamiast tego `com.bullitt.wave` (referrer `android-app://android`, flagi
    `NEW_TASK|EXCLUDE_FROM_RECENTS`) uruchamia `LaunchReceiverActivity`. Stąd tryb hybrydowy:
    KeyEvent przy włączonym ekranie + uruchomienie aplikacji przy zgaszonym.
+   Otwarte (2026-10-10, v0.1.9): przy zgaszonym ekranie i podwójnym naciśnięciu zarejestrowano
+   tylko 1 z kilku gestów. Od v0.1.10 każde uruchomienie i start procesu są zawsze w
+   `diagnostic_log` (z flagami `screen_on`, `keyguardLocked`, `serviceRunning`), a uruchomienie
+   zawsze startuje usługę – powtórzyć test i wyeksportować log.
    Keycode: **291** (vendor: `KEYCODE_MACRO1_ON`), scancode: **183**, urządzenie wejściowe:
    `gpio_keys` (deviceId 9, source 0x101). Krótkie naciśnięcie trwa ok. 180 ms
    (DOWN→UP), więc domyślny debounce 150 ms nie zjada naciśnięć.
