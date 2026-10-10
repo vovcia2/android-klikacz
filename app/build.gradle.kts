@@ -6,6 +6,36 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+// ---------------------------------------------------------------------------------------------
+// Automatic versioning.
+//
+//   versionCode = number of commits reachable from HEAD (monotonic on a linear main branch)
+//   versionName = "<tag>"        when HEAD is tagged vX.Y.Z (release builds from a tag)
+//               = "<base>.<versionCode>" otherwise, e.g. 0.1.42 (base from gradle.properties)
+//
+// CI may override both with the VERSION_CODE / VERSION_NAME environment variables.
+// The APK is renamed to ClickLog-<versionName>-<variant>.apk.
+// ---------------------------------------------------------------------------------------------
+fun git(vararg args: String): String? = runCatching {
+    providers.exec {
+        commandLine("git", *args)
+        isIgnoreExitValue = true
+    }.standardOutput.asText.get().trim().ifEmpty { null }
+}.getOrNull()
+
+val versionBase: String = (findProperty("app.versionBase") as String?) ?: "0.1"
+val gitCommitCount: Int = git("rev-list", "--count", "HEAD")?.toIntOrNull() ?: 1
+val gitSha: String = git("rev-parse", "--short=8", "HEAD") ?: "nogit"
+val gitTag: String? = git("describe", "--tags", "--exact-match", "HEAD")
+    ?.takeIf { Regex("""v\d+\.\d+\.\d+""").matches(it) }
+
+val appVersionCode: Int = System.getenv("VERSION_CODE")?.toIntOrNull() ?: gitCommitCount
+val appVersionName: String = System.getenv("VERSION_NAME")?.takeIf { it.isNotBlank() }
+    ?: gitTag?.removePrefix("v")
+    ?: "$versionBase.$gitCommitCount"
+
+logger.lifecycle("ClickLog version: $appVersionName ($appVersionCode) @ $gitSha")
+
 android {
     namespace = "com.klikacz.clicklog"
     compileSdk = 36
@@ -14,8 +44,9 @@ android {
         applicationId = "com.klikacz.clicklog"
         minSdk = 31
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
+        buildConfigField("String", "GIT_SHA", "\"$gitSha\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,6 +62,16 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    // ClickLog-<versionName>-<variant>.apk
+    applicationVariants.all {
+        val variant = this
+        outputs.all {
+            (this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl)?.outputFileName =
+                "ClickLog-${variant.versionName}-${variant.name}.apk"
+        }
     }
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"

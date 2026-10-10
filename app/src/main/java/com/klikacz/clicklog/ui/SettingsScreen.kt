@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.klikacz.clicklog.BuildConfig
 import com.klikacz.clicklog.R
 import com.klikacz.clicklog.data.AppSettings
 import com.klikacz.clicklog.data.PathMode
@@ -129,6 +130,12 @@ fun SettingsScreen(
                 Button(onClick = onWizard, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_run_wizard)) }
                 Button(onClick = onDiagnostics, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.settings_diagnostics)) }
             }
+
+            Text(
+                "ClickLog ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · ${BuildConfig.GIT_SHA}",
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 

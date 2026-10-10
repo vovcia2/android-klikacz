@@ -1,0 +1,109 @@
+name: Build APK
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build, test, lint
+    runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
+    steps:
+      - name: Checkout (full history for commit-count versioning)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platforms;android-36 build-tools;36.0.0 platform-tools
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Compute version
+        id: version
+        run: |
+          set -euo pipefail
+          COUNT=$(git rev-list --count HEAD)
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            NAME="${GITHUB_REF#refs/tags/v}"
+          else
+            BASE=$(grep -E '^app\.versionBase=' gradle.properties | cut -d= -f2)
+            NAME="${BASE}.${COUNT}"
+          fi
+          echo "version_code=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "version_name=${NAME}"  >> "$GITHUB_OUTPUT"
+          echo "ClickLog ${NAME} (${COUNT})" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon --console=plain
+
+      - name: Lint
+        run: ./gradlew lintDebug --no-daemon --console=plain
+
+      - name: Build debug APK
+        env:
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+        run: |
+          ./gradlew assembleDebug --no-daemon --console=plain
+          ls -la app/build/outputs/apk/debug/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClickLog-${{ steps.version.outputs.version_name }}-debug
+          path: app/build/outputs/apk/debug/ClickLog-*.apk
+          if-no-files-found: error
+
+      - name: Upload test and lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ steps.version.outputs.version_name }}
+          path: |
+            app/build/reports/
+            app/build/test-results/
+          if-no-files-found: ignore
+
+  release:
+    name: GitHub release
+    needs: build
+    if: github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref_name == github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: ClickLog-${{ needs.build.outputs.version_name }}-debug
+          path: apk
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.build.outputs.version_name }}
+          name: ClickLog ${{ needs.build.outputs.version_name }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
+          files: apk/ClickLog-*.apk
