@@ -42,6 +42,12 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
    tylko 1 z kilku gestów. Od v0.1.10 każde uruchomienie i start procesu są zawsze w
    `diagnostic_log` (z flagami `screen_on`, `keyguardLocked`, `serviceRunning`), a uruchomienie
    zawsze startuje usługę – powtórzyć test i wyeksportować log.
+   Rozwiązane (2026-10-10, v0.1.10, log diagnostyczny): przy podwójnym naciśnięciu system
+   dostarcza gest jako **keycode 141 (`KEYCODE_F11`, urządzenie `ff_key`)** gdy ekran jest
+   włączony, a jako uruchomienie aplikacji gdy jest zgaszony. Pierwsze podwójne naciśnięcie
+   budzi ekran (uruchomienie), kolejne przychodzą jako 141. Kreator (krok 3 „wykonaj gest
+   3 razy”) wybiera keycode 141 dla gestu podwójnego. W tym teście usługa dostępności była
+   wyłączona (brak wpisów ACCESSIBILITY_KEY) – po reinstalacji trzeba ją włączyć ponownie.
    Keycode: **291** (vendor: `KEYCODE_MACRO1_ON`), scancode: **183**, urządzenie wejściowe:
    `gpio_keys` (deviceId 9, source 0x101). Krótkie naciśnięcie trwa ok. 180 ms
    (DOWN→UP), więc domyślny debounce 150 ms nie zjada naciśnięć.

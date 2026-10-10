@@ -107,8 +107,8 @@
     <string name="wizard_step2_status_on">Usługa dostępności: włączona ✔</string>
     <string name="wizard_step2_status_off">Usługa dostępności: wyłączona</string>
     <string name="wizard_step3_title">3. Test przycisku</string>
-    <string name="wizard_step3_text">Naciśnij teraz przycisk SOS 3 razy. Nie dotykaj ikony aplikacji ani innych klawiszy. Aplikacja nasłuchuje na wszystkich kanałach i pokazuje na żywo, co dociera.</string>
-    <string name="wizard_step3_presses">Wykryte naciśnięcia: %1$d / 3</string>
+    <string name="wizard_step3_text">Wykonaj teraz 3 razy gest przypisany do ClickLog w ustawieniach systemu (pojedyncze lub podwójne naciśnięcie SOS), z przerwami ok. 2 s. Nie dotykaj ikony aplikacji ani innych klawiszy. Aplikacja nasłuchuje na wszystkich kanałach i pokazuje na żywo, co dociera. Uwaga: podwójne naciśnięcie system może zamienić na inny keycode niż pojedyncze – to normalne.</string>
+    <string name="wizard_step3_presses">Wykryte gesty: %1$d / 3</string>
     <string name="wizard_step3_time_left">Pozostało: %1$d s</string>
     <string name="wizard_step3_live">Zdarzenia na żywo</string>
     <string name="wizard_step3_nothing_yet">Jeszcze nic nie dotarło…</string>
@@ -117,6 +117,8 @@
     <string name="wizard_summary_counts">Usługa dostępności: %1$d · Activity: %2$d · Intenty: %3$d · Broadcasty: %4$d · Media: %5$d</string>
     <string name="wizard_reason_accessibility">Usługa dostępności widzi przycisk (keycode %1$d). Wybrano ścieżkę A.</string>
     <string name="wizard_reason_activity_only">Przycisk dociera do ekranu aplikacji (keycode %1$d), ale usługa dostępności go nie przechwytuje – ścieżka A nie zadziała w tle. Zostanie użyta ścieżka B.</string>
+    <string name="wizard_reason_activity_only_disabled">Przycisk dociera do ekranu aplikacji (keycode %1$d), ale usługa dostępności ClickLog jest wyłączona, więc w tle (przy włączonym ekranie) kliknięcia nie będą liczone. Wróć do kroku 2, włącz usługę i powtórz test.</string>
+    <string name="wizard_step2_warning">Bez usługi dostępności naciśnięcia przy włączonym ekranie są liczone tylko wtedy, gdy ClickLog jest na wierzchu. Po każdej reinstalacji aplikacji sprawdź, czy usługa nadal jest włączona.</string>
     <string name="wizard_reason_launch">System uruchamia aplikację przy naciśnięciu. Wybrano ścieżkę B (LAUNCH_INTENT).</string>
     <string name="wizard_reason_none">Nie wykryto przycisku.</string>
     <string name="wizard_checklist_title">Sprawdź:</string>

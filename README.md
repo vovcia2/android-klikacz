@@ -29,6 +29,13 @@ i ręczne uruchomienie: testy jednostkowe → lint → `assembleDebug`; APK i ra
 do artefaktów joba. Push na domyślną gałąź lub tag `v*` publikuje dodatkowo GitHub Release
 `v<versionName>` z załączonym APK.
 
+### Podpis debug
+
+`keystore/debug.keystore` (standardowe hasło `android`) jest w repozytorium, żeby każdy build –
+lokalny i z CI – miał ten sam podpis i instalował się jako aktualizacja bez odinstalowania
+(które kasuje bazę, ustawienia i włączoną usługę dostępności). Pierwsza instalacja APK z tym
+kluczem po wersji z innym podpisem wymaga jeszcze jednorazowego odinstalowania.
+
 ## Jak to działa
 
 Dwie ścieżki przechwytywania, obie zaimplementowane za wspólnym interfejsem `ClickSource`:
@@ -38,9 +45,11 @@ Dwie ścieżki przechwytywania, obie zaimplementowane za wspólnym interfejsem `
 | A `KEY_EVENT` | `ClickAccessibilityService` → `KeyEventClickSource` | `AccessibilityService.onKeyEvent` z `canRequestFilterKeyEvents`; działa w tle i przy zgaszonym ekranie, znacznik czasu z `KeyEvent.eventTime`; zdarzenie z zapamiętanym keycode jest konsumowane |
 | B `LAUNCH_INTENT` | `LaunchReceiverActivity` → `IntentClickSource` | system uruchamia niewidoczną aktywność; czas pobierany w pierwszej linii `onCreate` |
 
-**Obie ścieżki działają jednocześnie.** Na CAT S75 przy zgaszonym ekranie klawisz nie dociera do
-usługi dostępności – zamiast tego systemowa obsługa przycisku (`com.bullitt.wave`) uruchamia
-przypisaną aplikację. Dlatego uruchomienia `LaunchReceiverActivity` są liczone zawsze, a ścieżka
+**Obie ścieżki działają jednocześnie.** Na CAT S75 systemowa obsługa przycisku (`com.bullitt.wave`)
+dostarcza gest różnie zależnie od stanu ekranu: pojedyncze naciśnięcie to surowy keycode 291
+(`gpio_keys`), podwójne naciśnięcie przy włączonym ekranie to jeden syntetyczny keycode 141
+(`KEYCODE_F11`, urządzenie `ff_key`), a przy zgaszonym ekranie to uruchomienie przypisanej
+aplikacji. Kreator uczy się keycode gestu, który użytkownik faktycznie przypisał. Dlatego uruchomienia `LaunchReceiverActivity` są liczone zawsze, a ścieżka
 A dodatkowo przechwytuje `KeyEvent` przy włączonym ekranie. `ClickProcessor` (czysty Kotlin,
 testowany jednostkowo) robi debounce (domyślnie 150 ms), łączy to samo naciśnięcie widziane
 z obu źródeł (okno 600 ms, ustawienie „Okno łączenia źródeł”) i zapisuje kliknięcia

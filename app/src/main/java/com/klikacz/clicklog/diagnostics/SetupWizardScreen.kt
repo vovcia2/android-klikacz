@@ -110,6 +110,9 @@ private fun StepAccessibility(enabled: Boolean, onOpen: () -> Unit) {
             style = MaterialTheme.typography.titleMedium,
         )
         Button(onClick = onOpen, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.wizard_step2_open)) }
+        if (!enabled) {
+            Text(stringResource(R.string.wizard_step2_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
     }
 }
 
@@ -128,7 +131,7 @@ private fun StepButtonTest(state: WizardState, onStart: () -> Unit) {
             if (decision != null) {
                 HorizontalDivider()
                 Text(stringResource(R.string.wizard_step3_summary), style = MaterialTheme.typography.titleMedium)
-                DecisionSummary(decision)
+                DecisionSummary(decision, state.accessibilityEnabled)
                 OutlinedButton(onClick = onStart, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.retry)) }
             }
         }
@@ -199,7 +202,7 @@ private fun StepResult(state: WizardState) {
                 Text(stringResource(R.string.wizard_result_screen_off_via_launch), style = MaterialTheme.typography.bodySmall)
             }
         }
-        if (decision != null) DecisionSummary(decision)
+        if (decision != null) DecisionSummary(decision, state.accessibilityEnabled)
         if (decision?.path == ClickSourceType.LAUNCH_INTENT) {
             Text(stringResource(R.string.wizard_result_hint_b), style = MaterialTheme.typography.bodySmall)
         }
@@ -207,7 +210,7 @@ private fun StepResult(state: WizardState) {
 }
 
 @Composable
-private fun DecisionSummary(decision: PathDecision) {
+private fun DecisionSummary(decision: PathDecision, accessibilityEnabled: Boolean) {
     Text(
         stringResource(
             R.string.wizard_summary_counts,
@@ -218,7 +221,13 @@ private fun DecisionSummary(decision: PathDecision) {
     )
     when (decision.reason) {
         PathReason.ACCESSIBILITY_KEY -> Text(stringResource(R.string.wizard_reason_accessibility, decision.keycode ?: -1))
-        PathReason.ACTIVITY_ONLY -> Text(stringResource(R.string.wizard_reason_activity_only, decision.keycode ?: -1), color = MaterialTheme.colorScheme.error)
+        PathReason.ACTIVITY_ONLY -> Text(
+            stringResource(
+                if (accessibilityEnabled) R.string.wizard_reason_activity_only else R.string.wizard_reason_activity_only_disabled,
+                decision.keycode ?: -1,
+            ),
+            color = MaterialTheme.colorScheme.error,
+        )
         PathReason.LAUNCH_INTENT -> Text(stringResource(R.string.wizard_reason_launch))
         PathReason.NOT_DETECTED -> {
             Text(stringResource(R.string.wizard_reason_none), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleMedium)
