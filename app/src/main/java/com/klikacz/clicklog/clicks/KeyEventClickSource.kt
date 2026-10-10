@@ -28,13 +28,14 @@ class KeyEventClickSource @Inject constructor(
      * @return true if the event belongs to the configured button and should be consumed so the
      *   system does not also run its default SOS action (spec §4).
      */
-    fun onKeyEvent(keyCode: Int, action: Int, eventTimeUptimeMs: Long, nowUptimeMs: Long, nowWallMs: Long): Boolean {
+    fun onKeyEvent(keyCode: Int, action: Int, repeatCount: Int, eventTimeUptimeMs: Long, nowUptimeMs: Long, nowWallMs: Long): Boolean {
         val settings = config.current
         if (settings.effectivePath != ClickSourceType.KEY_EVENT) return false
         val wanted = settings.activeKeycode ?: return false
         if (keyCode != wanted) return false
 
-        if (action == KeyEvent.ACTION_DOWN) {
+        // Auto-repeat DOWNs (key held) are the same press: consume but do not emit.
+        if (action == KeyEvent.ACTION_DOWN && repeatCount == 0) {
             val click = RawClick(
                 wallTimeMs = ClickProcessor.eventWallTime(eventTimeUptimeMs, nowUptimeMs, nowWallMs),
                 uptimeMs = eventTimeUptimeMs,

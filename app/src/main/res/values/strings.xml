@@ -76,6 +76,10 @@
     <string name="settings_new_session_confirm">Rozpocząć nową sesję? Licznik zacznie od zera; poprzednie kliknięcia zostają w bazie i w eksporcie wszystkich sesji.</string>
     <string name="settings_export_csv">Eksport CSV (bieżąca sesja)</string>
     <string name="settings_export_csv_all">Eksport CSV (wszystkie sesje)</string>
+    <string name="settings_gesture">Gest przypisany do ClickLog w systemie</string>
+    <string name="settings_gesture_single">Pojedyncze naciśnięcie</string>
+    <string name="settings_gesture_double">Podwójne naciśnięcie</string>
+    <string name="settings_gesture_hint">Ustaw tak samo jak w ustawieniach „Przycisk programowalny”. Przy podwójnym naciśnięciu dwa KeyEventy w ciągu 0,8 s i uruchomienie aplikacji, które po nich następuje, są liczone jako jedno kliknięcie.</string>
     <string name="settings_debounce">Okno debounce (ms)</string>
     <string name="settings_debounce_hint">Kolejne naciśnięcie szybciej niż to okno jest ignorowane (auto-repeat).</string>
     <string name="settings_merge">Okno łączenia źródeł (ms)</string>
@@ -95,7 +99,7 @@
     <string name="wizard_title">Kreator konfiguracji</string>
     <string name="wizard_step">Krok %1$d z %2$d</string>
     <string name="wizard_step1_title">1. Przypisz przycisk SOS do ClickLog</string>
-    <string name="wizard_step1_text">W ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do aplikacji ClickLog – jeśli lista pokazuje dwa wpisy, wybierz „ClickLog – przycisk”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
+    <string name="wizard_step1_text">W ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do „ClickLog – przycisk” (jeśli lista pokazuje dwa wpisy ClickLog, wybierz ten z dopiskiem „przycisk”). Jeśli system pozwala przypisać aplikację tylko do podwójnego naciśnięcia, użyj go i w ustawieniach ClickLog wybierz „Gest: podwójne naciśnięcie”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
     <string name="wizard_step1_open_settings">Otwórz ustawienia systemu</string>
     <string name="wizard_step2_title">2. Włącz usługę dostępności</string>
     <string name="wizard_step2_text">Usługa dostępności pozwala odbierać przycisk jako KeyEvent także przy zgaszonym ekranie (ścieżka A). Otwórz ustawienia dostępności, znajdź „ClickLog – przycisk SOS” i włącz. Jeśli system nie pozwoli, kreator użyje ścieżki B.</string>
@@ -120,7 +124,7 @@
     <string name="wizard_checklist_accessibility">• Czy usługa dostępności ClickLog jest włączona?</string>
     <string name="wizard_checklist_sos">• Czy domyślna akcja SOS została wyłączona?</string>
     <string name="wizard_step4_title">4. Test przy zgaszonym ekranie</string>
-    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania, naciśnij przycisk SOS 3 razy w odstępach ok. 2 s (system może zapalić ekran po pierwszym naciśnięciu – to normalne), a potem odblokuj telefon i wróć tutaj. Aplikacja policzy, ile naciśnięć zarejestrowano w tym czasie.</string>
+    <string name="wizard_step4_text">Zgaś ekran przyciskiem zasilania i wykonaj 3 razy gest przypisany do ClickLog (pojedyncze lub podwójne naciśnięcie SOS) w odstępach ok. 2 s. System może zapalić ekran po pierwszym – to normalne. Potem odblokuj telefon i wróć tutaj. Aplikacja policzy, ile naciśnięć zarejestrowano w tym czasie.</string>
     <string name="wizard_step4_breakdown">W tym jako KeyEvent: %1$d, jako uruchomienie aplikacji: %2$d</string>
     <string name="wizard_result_screen_off_via_launch">Przy zgaszonym ekranie system nie dostarcza KeyEvent – uruchamia aplikację. Takie uruchomienia są zawsze liczone jako kliknięcia (bez znacznika czasu jądra, ekran się budzi).</string>
     <string name="wizard_step4_count">Zarejestrowano przy zgaszonym ekranie: %1$d</string>

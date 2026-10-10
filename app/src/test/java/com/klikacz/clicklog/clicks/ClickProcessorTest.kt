@@ -27,7 +27,7 @@ class ClickProcessorTest {
      * The processor's consumer coroutine runs on the test scheduler under a job we cancel at the
      * end of each test; `backgroundScope` is not driven by `advanceUntilIdle`.
      */
-    private class Harness(scope: TestScope, debounce: Int = 150, merge: Int = 600) {
+    private class Harness(scope: TestScope, debounce: Int = 150, merge: Int = 600, double: Int = 0) {
         val persisted = mutableListOf<ClickEntity>()
         private var nextId = 1L
         private val job = SupervisorJob()
@@ -38,13 +38,14 @@ class ClickProcessorTest {
             sessionId = { 42L },
             persist = { e -> e.copy(id = nextId++).also { persisted += it } },
             crossSourceMergeMs = { merge },
+            doublePressWindowMs = { double },
         )
 
         fun close() = job.cancel()
     }
 
-    private fun harnessTest(debounce: Int = 150, merge: Int = 600, body: suspend TestScope.(Harness) -> Unit) = runTest {
-        val h = Harness(this, debounce, merge)
+    private fun harnessTest(debounce: Int = 150, merge: Int = 600, double: Int = 0, body: suspend TestScope.(Harness) -> Unit) = runTest {
+        val h = Harness(this, debounce, merge, double)
         try {
             body(h)
         } finally {
@@ -195,5 +196,63 @@ class ClickProcessorTest {
         advanceUntilIdle()
         assertEquals(3, h.persisted.size)
         assertEquals(listOf<Long?>(null, null, null), h.persisted.map { it.uptimeMs })
+    }
+
+    @Test
+    fun `a second real press shortly after a merged launch is still a new click`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))     // press 1
+        assertNull(h.processor.offer(intent(1_300)))     // launch for press 1 -> merged
+        assertNotNull(h.processor.offer(key(1_400)))     // press 2, only 100 ms after the launch
+        assertNull(h.processor.offer(intent(1_700)))     // launch for press 2 -> merged
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    @Test
+    fun `a gesture never absorbs a second launch`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNull(h.processor.offer(intent(1_200)))
+        assertNotNull(h.processor.offer(intent(1_500)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    // ---- double-press gesture ---------------------------------------------------------------
+
+    @Test
+    fun `double press mode - two key events and the launch are one click`() = harnessTest(double = 800) { h ->
+        assertNotNull(h.processor.offer(key(1_000)))     // DOWN 1 -> click
+        assertNull(h.processor.offer(key(1_250)))        // DOWN 2 -> second half
+        assertNull(h.processor.offer(intent(1_600)))     // vendor launch 350 ms after DOWN 2
+        assertNotNull(h.processor.offer(key(3_000)))     // next double press
+        assertNull(h.processor.offer(key(3_260)))
+        assertNull(h.processor.offer(intent(3_700)))
+        advanceUntilIdle()
+        assertEquals(listOf(1_000L, 3_000L), h.persisted.map { it.uptimeMs })
+    }
+
+    @Test
+    fun `double press mode - third key event in the window starts a new click`() = harnessTest(double = 800) { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNull(h.processor.offer(key(1_250)))
+        assertNotNull(h.processor.offer(key(1_500)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    @Test
+    fun `double press mode - screen off launches count one each`() = harnessTest(double = 800) { h ->
+        assertNotNull(h.processor.offer(intent(1_000)))
+        assertNotNull(h.processor.offer(intent(3_000)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    @Test
+    fun `single press mode - two key events 250 ms apart are two clicks`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNotNull(h.processor.offer(key(1_250)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
     }
 }

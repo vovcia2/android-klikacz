@@ -11,18 +11,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Debounces raw clicks and persists them in order (spec §2.1, §5).
+ * Turns raw clicks into stored clicks (spec §2.1, §5): one stored click per physical *gesture*.
  *
- * Two windows apply, both on the uptime clock:
- *  - [debounceMs]: a click closer than this to the last accepted click is auto-repeat/bounce;
- *  - [crossSourceMergeMs]: a click from the *other* source closer than this to the last accepted
- *    click is the same physical press seen twice (KeyEvent + app launch) and is merged.
+ * A gesture starts with an accepted raw click and absorbs later raw clicks that belong to the
+ * same press. All windows are on the uptime clock:
+ *  - [debounceMs]: any raw click closer than this to the gesture start is bounce / auto-repeat;
+ *  - [doublePressWindowMs] (0 = single-press mode): in double-press mode a second KeyEvent
+ *    closer than this to the gesture start is the second half of the gesture;
+ *  - [crossSourceMergeMs]: the same press can be seen twice, as a KeyEvent and as an app launch
+ *    by the vendor key handler. One launch (resp. one key) closer than this to the gesture's
+ *    last event is merged into it. A gesture never absorbs a second launch, and never absorbs a
+ *    key once it has keys, so two real presses are never collapsed through a launch between them.
  *
- * Pure Kotlin so it can be unit-tested: all Android wiring lives in [ClickPipeline].
+ * Pure Kotlin so it can be unit-tested; Android wiring lives in [ClickPipeline].
  *
- * Persistence is sequential: a single consumer coroutine drains an unbounded channel on the
- * IO dispatcher, so clicks are stored in arrival order and nothing is lost if the process is
- * killed shortly after a click (the insert is already queued and completes on the IO thread).
+ * Persistence is sequential: a single consumer drains an unbounded channel on the IO dispatcher,
+ * so clicks are stored in arrival order and nothing is lost if the process is killed shortly
+ * after a click.
  */
 class ClickProcessor(
     private val scope: CoroutineScope,
@@ -31,18 +36,17 @@ class ClickProcessor(
     private val sessionId: () -> Long,
     private val persist: suspend (ClickEntity) -> ClickEntity,
     private val crossSourceMergeMs: () -> Int = { DEFAULT_CROSS_SOURCE_MERGE_MS },
+    private val doublePressWindowMs: () -> Int = { 0 },
 ) {
+    private class Gesture(val startMs: Long, var lastMs: Long, var keyCount: Int, var launchCount: Int)
+
     private val queue = Channel<ClickEntity>(Channel.UNLIMITED)
     private val _stored = MutableSharedFlow<ClickEntity>(extraBufferCapacity = 64)
 
     /** Clicks after they have been written to the database. */
     val stored: SharedFlow<ClickEntity> = _stored.asSharedFlow()
 
-    @Volatile
-    private var lastAcceptedMonotonicMs: Long? = null
-
-    @Volatile
-    private var lastAcceptedSource: ClickSourceType? = null
+    private var gesture: Gesture? = null
 
     init {
         scope.launch {
@@ -55,18 +59,22 @@ class ClickProcessor(
 
     /**
      * Offers a raw click. Returns the entity queued for persistence, or null if the click was
-     * rejected by the debounce window.
+     * absorbed into the current gesture (debounced, second half of a double press, or the same
+     * press seen on the other source).
      */
     @Synchronized
     fun offer(raw: RawClick): ClickEntity? {
-        val last = lastAcceptedMonotonicMs
-        if (last != null) {
-            val since = raw.monotonicMs - last
-            if (since < debounceMs()) return null
-            if (raw.source != lastAcceptedSource && since < crossSourceMergeMs()) return null
+        val g = gesture
+        if (g != null && absorb(g, raw)) {
+            g.lastMs = raw.monotonicMs
+            return null
         }
-        lastAcceptedMonotonicMs = raw.monotonicMs
-        lastAcceptedSource = raw.source
+        gesture = Gesture(
+            startMs = raw.monotonicMs,
+            lastMs = raw.monotonicMs,
+            keyCount = if (raw.source == ClickSourceType.KEY_EVENT) 1 else 0,
+            launchCount = if (raw.source == ClickSourceType.LAUNCH_INTENT) 1 else 0,
+        )
         val entity = ClickEntity(
             sessionId = sessionId(),
             wallTimeMs = raw.wallTimeMs,
@@ -77,11 +85,27 @@ class ClickProcessor(
         return entity
     }
 
-    /** Forgets the debounce state (e.g. on new session). */
+    private fun absorb(g: Gesture, raw: RawClick): Boolean {
+        val sinceStart = raw.monotonicMs - g.startMs
+        val sinceLast = raw.monotonicMs - g.lastMs
+        if (sinceStart < debounceMs()) return true
+        return when (raw.source) {
+            ClickSourceType.KEY_EVENT -> when {
+                g.keyCount == 1 && sinceStart < doublePressWindowMs() -> { g.keyCount++; true }
+                g.keyCount == 0 && g.launchCount > 0 && sinceLast < crossSourceMergeMs() -> { g.keyCount++; true }
+                else -> false
+            }
+            ClickSourceType.LAUNCH_INTENT -> when {
+                g.launchCount == 0 && g.keyCount > 0 && sinceLast < crossSourceMergeMs() -> { g.launchCount++; true }
+                else -> false
+            }
+        }
+    }
+
+    /** Forgets the gesture state (e.g. on new session). */
     @Synchronized
     fun reset() {
-        lastAcceptedMonotonicMs = null
-        lastAcceptedSource = null
+        gesture = null
     }
 
     companion object {

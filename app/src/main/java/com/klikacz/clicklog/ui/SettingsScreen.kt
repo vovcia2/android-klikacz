@@ -46,6 +46,7 @@ import com.klikacz.clicklog.BuildConfig
 import com.klikacz.clicklog.R
 import com.klikacz.clicklog.data.AppSettings
 import com.klikacz.clicklog.data.PathMode
+import com.klikacz.clicklog.data.PressGesture
 import com.klikacz.clicklog.export.CsvExporter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -99,6 +100,12 @@ fun SettingsScreen(
             SectionCard(title = stringResource(R.string.settings_export_csv)) {
                 ExportRow(label = stringResource(R.string.settings_export_csv), onSave = { exportAll = false; createDocument.launch(CsvExporter.CLICKS_FILE) }, onShare = { viewModel.shareCsv(false) })
                 ExportRow(label = stringResource(R.string.settings_export_csv_all), onSave = { exportAll = true; createDocument.launch(CsvExporter.CLICKS_FILE) }, onShare = { viewModel.shareCsv(true) })
+            }
+
+            SectionCard(title = stringResource(R.string.settings_gesture)) {
+                PathModeOption(stringResource(R.string.settings_gesture_single), s.pressGesture == PressGesture.SINGLE) { viewModel.setPressGesture(PressGesture.SINGLE) }
+                PathModeOption(stringResource(R.string.settings_gesture_double), s.pressGesture == PressGesture.DOUBLE) { viewModel.setPressGesture(PressGesture.DOUBLE) }
+                Text(stringResource(R.string.settings_gesture_hint), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
             }
 
             SectionCard(title = stringResource(R.string.settings_debounce)) {

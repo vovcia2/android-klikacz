@@ -38,6 +38,7 @@ class ClickPipeline @Inject constructor(
         sessionId = { config.current.sessionId },
         persist = repository::insert,
         crossSourceMergeMs = { config.current.crossSourceMergeMs },
+        doublePressWindowMs = { config.current.doublePressWindowMs },
     )
 
     /** Clicks after they have been written to the database. */

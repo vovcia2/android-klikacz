@@ -47,6 +47,7 @@ class ClickAccessibilityService : AccessibilityService() {
         val consumed = keySource.onKeyEvent(
             keyCode = event.keyCode,
             action = event.action,
+            repeatCount = event.repeatCount,
             eventTimeUptimeMs = event.eventTime,
             nowUptimeMs = nowUptime,
             nowWallMs = nowWall,

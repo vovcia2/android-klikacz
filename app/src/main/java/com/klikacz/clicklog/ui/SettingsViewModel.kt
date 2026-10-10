@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.klikacz.clicklog.clicks.ClickPipeline
 import com.klikacz.clicklog.data.AppSettings
 import com.klikacz.clicklog.data.PathMode
+import com.klikacz.clicklog.data.PressGesture
 import com.klikacz.clicklog.data.Settings
 import com.klikacz.clicklog.export.CsvExporter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,6 +49,7 @@ class SettingsViewModel @Inject constructor(
     fun setDebounce(ms: Int) = viewModelScope.launch { settings.setDebounceMs(ms) }
     fun setCrossSourceMerge(ms: Int) = viewModelScope.launch { settings.setCrossSourceMergeMs(ms) }
     fun setPathMode(mode: PathMode) = viewModelScope.launch { settings.setPathMode(mode) }
+    fun setPressGesture(g: PressGesture) = viewModelScope.launch { settings.setPressGesture(g) }
     fun setDiagnosticsMode(on: Boolean) = viewModelScope.launch { settings.setDiagnosticsMode(on) }
     fun setVibrate(on: Boolean) = viewModelScope.launch { settings.setVibrateOnClick(on) }
 

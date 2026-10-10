@@ -20,6 +20,13 @@ import javax.inject.Singleton
 /** How the active capture path is chosen (spec §2.2 "wybór ścieżki AUTO / A / B"). */
 enum class PathMode { AUTO, KEY_EVENT, LAUNCH_INTENT }
 
+/**
+ * Which key gesture is assigned to ClickLog in the system's Programmable Key settings.
+ * With DOUBLE, two KeyEvents inside [AppSettings.DOUBLE_PRESS_WINDOW_MS] count as one click,
+ * matching the single app launch the vendor handler produces for a double press.
+ */
+enum class PressGesture { SINGLE, DOUBLE }
+
 /** Outcome of the setup wizard, persisted in DataStore (spec §3.1 step 5). */
 data class DiagnosisResult(
     val path: ClickSourceType?,
@@ -39,6 +46,7 @@ data class AppSettings(
     val debounceMs: Int,
     /** Window in which a KeyEvent click and an app-launch click count as one press. */
     val crossSourceMergeMs: Int,
+    val pressGesture: PressGesture,
     val pathMode: PathMode,
     val diagnosis: DiagnosisResult?,
     val wizardCompleted: Boolean,
@@ -54,12 +62,17 @@ data class AppSettings(
             PathMode.LAUNCH_INTENT -> ClickSourceType.LAUNCH_INTENT
         }
 
+    /** Window for the second KeyEvent of a double press; 0 in single-press mode. */
+    val doublePressWindowMs: Int
+        get() = if (pressGesture == PressGesture.DOUBLE) DOUBLE_PRESS_WINDOW_MS else 0
+
     /** Keycode consumed by the accessibility service on path A, if known. */
     val activeKeycode: Int? get() = diagnosis?.keycode
 
     companion object {
         const val DEFAULT_DEBOUNCE_MS = 150
         const val DEFAULT_CROSS_SOURCE_MERGE_MS = 600
+        const val DOUBLE_PRESS_WINDOW_MS = 800
         const val MIN_DEBOUNCE_MS = 0
         const val MAX_DEBOUNCE_MS = 2000
     }
@@ -75,6 +88,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         val DEBOUNCE_MS = intPreferencesKey("debounce_ms")
         val CROSS_SOURCE_MERGE_MS = intPreferencesKey("cross_source_merge_ms")
         val PATH_MODE = stringPreferencesKey("path_mode")
+        val PRESS_GESTURE = stringPreferencesKey("press_gesture")
         val DIAG_PATH = stringPreferencesKey("diag_path")
         val DIAG_KEYCODE = intPreferencesKey("diag_keycode")
         val DIAG_SCANCODE = intPreferencesKey("diag_scancode")
@@ -116,6 +130,8 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
         store.edit { it[Keys.CROSS_SOURCE_MERGE_MS] = clamped }
     }
 
+    suspend fun setPressGesture(gesture: PressGesture) = store.edit { it[Keys.PRESS_GESTURE] = gesture.name }
+
     suspend fun setPathMode(mode: PathMode) = store.edit { it[Keys.PATH_MODE] = mode.name }
 
     suspend fun setServiceEnabled(enabled: Boolean) = store.edit { it[Keys.SERVICE_ENABLED] = enabled }
@@ -154,6 +170,7 @@ class Settings @Inject constructor(@ApplicationContext private val context: Cont
             sessionId = this[Keys.SESSION_ID] ?: 0L,
             debounceMs = this[Keys.DEBOUNCE_MS] ?: AppSettings.DEFAULT_DEBOUNCE_MS,
             crossSourceMergeMs = this[Keys.CROSS_SOURCE_MERGE_MS] ?: AppSettings.DEFAULT_CROSS_SOURCE_MERGE_MS,
+            pressGesture = this[Keys.PRESS_GESTURE]?.let { runCatching { PressGesture.valueOf(it) }.getOrNull() } ?: PressGesture.SINGLE,
             pathMode = this[Keys.PATH_MODE]?.let { runCatching { PathMode.valueOf(it) }.getOrNull() } ?: PathMode.AUTO,
             diagnosis = diagnosis,
             wizardCompleted = this[Keys.WIZARD_COMPLETED] ?: false,
