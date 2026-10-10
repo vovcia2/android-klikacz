@@ -13,6 +13,22 @@ Z linii poleceń:
 ./gradlew testDebugUnitTest      # testy jednostkowe (ClickProcessor, PathSelector, CSV)
 ```
 
+## Wersjonowanie i CI
+
+Wersja jest wyliczana automatycznie w `app/build.gradle.kts`:
+
+- `versionCode` = liczba commitów osiągalnych z `HEAD` (`git rev-list --count HEAD`),
+- `versionName` = `<app.versionBase>.<versionCode>` (np. `0.1.42`; `app.versionBase` w
+  `gradle.properties` – podbij ręcznie przy nowej linii wydań), albo `X.Y.Z` gdy `HEAD`
+  ma tag `vX.Y.Z`,
+- plik APK nazywa się `ClickLog-<versionName>-<wariant>.apk`; wersja i SHA commita są
+  widoczne na dole ekranu Ustawienia.
+
+Workflow [`.github/workflows/build.yml`](.github/workflows/build.yml) na każdy push, PR
+i ręczne uruchomienie: testy jednostkowe → lint → `assembleDebug`; APK i raporty trafiają
+do artefaktów joba. Push na domyślną gałąź lub tag `v*` publikuje dodatkowo GitHub Release
+`v<versionName>` z załączonym APK.
+
 ## Jak to działa
 
 Dwie ścieżki przechwytywania, obie zaimplementowane za wspólnym interfejsem `ClickSource`:
