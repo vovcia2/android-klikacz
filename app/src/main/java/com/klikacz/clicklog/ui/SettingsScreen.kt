@@ -125,6 +125,7 @@ fun SettingsScreen(
                 PathModeOption(stringResource(R.string.path_mode_auto), s.pathMode == PathMode.AUTO) { viewModel.setPathMode(PathMode.AUTO) }
                 PathModeOption(stringResource(R.string.path_a), s.pathMode == PathMode.KEY_EVENT) { viewModel.setPathMode(PathMode.KEY_EVENT) }
                 PathModeOption(stringResource(R.string.path_b), s.pathMode == PathMode.LAUNCH_INTENT) { viewModel.setPathMode(PathMode.LAUNCH_INTENT) }
+                PathModeOption(stringResource(R.string.path_c), s.pathMode == PathMode.VENDOR_BROADCAST) { viewModel.setPathMode(PathMode.VENDOR_BROADCAST) }
                 Text(stringResource(R.string.path_launch_note), style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
             }
 

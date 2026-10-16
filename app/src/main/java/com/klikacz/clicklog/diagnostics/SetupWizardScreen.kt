@@ -176,6 +176,7 @@ private fun StepResult(state: WizardState) {
         val pathText = when (decision?.path) {
             ClickSourceType.KEY_EVENT -> stringResource(R.string.path_a)
             ClickSourceType.LAUNCH_INTENT -> stringResource(R.string.path_b)
+            ClickSourceType.VENDOR_BROADCAST -> stringResource(R.string.path_c)
             null -> stringResource(R.string.path_none)
         }
         Text(stringResource(R.string.wizard_result_path, pathText), style = MaterialTheme.typography.titleMedium)
@@ -220,6 +221,7 @@ private fun DecisionSummary(decision: PathDecision, accessibilityEnabled: Boolea
         style = MaterialTheme.typography.bodySmall,
     )
     when (decision.reason) {
+        PathReason.VENDOR_BROADCAST -> Text(stringResource(R.string.wizard_reason_vendor, decision.keycode ?: -1))
         PathReason.ACCESSIBILITY_KEY -> Text(stringResource(R.string.wizard_reason_accessibility, decision.keycode ?: -1))
         PathReason.ACTIVITY_ONLY -> Text(
             stringResource(

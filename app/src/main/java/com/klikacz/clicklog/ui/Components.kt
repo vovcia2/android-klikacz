@@ -50,7 +50,9 @@ fun DiagnosticRow(e: DiagnosticEntity, screenOffLabel: String) {
         val summary = when (e.channel) {
             DiagnosticChannel.ACTIVITY_KEY, DiagnosticChannel.ACCESSIBILITY_KEY, DiagnosticChannel.MEDIA_BUTTON ->
                 "${e.action} keycode=${e.keycode} scancode=${e.scancode}"
-            DiagnosticChannel.LAUNCH_INTENT, DiagnosticChannel.MAIN_INTENT, DiagnosticChannel.VENDOR_BROADCAST ->
+            DiagnosticChannel.VENDOR_BROADCAST ->
+                if (e.keycode != null) "${e.action} keycode=${e.keycode} intent=${e.intentAction}" else "intent=${e.intentAction}"
+            DiagnosticChannel.LAUNCH_INTENT, DiagnosticChannel.MAIN_INTENT ->
                 "intent=${e.intentAction}"
             DiagnosticChannel.APP, DiagnosticChannel.CLICK -> e.extrasJson ?: ""
         }

@@ -30,6 +30,7 @@ class ClickPipeline @Inject constructor(
     private val repository: ClickRepository,
     keySource: KeyEventClickSource,
     intentSource: IntentClickSource,
+    broadcastSource: BroadcastClickSource,
     private val logger: com.klikacz.clicklog.diagnostics.DiagnosticLogger,
     private val locationTagger: com.klikacz.clicklog.location.LocationTagger,
 ) {
@@ -52,7 +53,7 @@ class ClickPipeline @Inject constructor(
 
     init {
         scope.launch {
-            merge(keySource.clicks, intentSource.clicks).collect { raw ->
+            merge(keySource.clicks, intentSource.clicks, broadcastSource.clicks).collect { raw ->
                 val accepted = processor.offer(raw)
                 logger.logClick(raw.wallTimeMs, raw.source.name, accepted != null)
                 if (accepted == null) {

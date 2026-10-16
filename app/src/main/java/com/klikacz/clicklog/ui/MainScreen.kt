@@ -101,6 +101,7 @@ fun MainScreen(
                     when (path) {
                         ClickSourceType.KEY_EVENT -> stringResource(R.string.path_a)
                         ClickSourceType.LAUNCH_INTENT -> stringResource(R.string.path_b)
+                        ClickSourceType.VENDOR_BROADCAST -> stringResource(R.string.path_c)
                         null -> stringResource(R.string.path_none)
                     },
                     ok = path != null,

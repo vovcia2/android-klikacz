@@ -153,7 +153,7 @@ class SetupWizardViewModel @Inject constructor(
         testJobs += viewModelScope.launch {
             dao.observeSince(start).collect { events ->
                 val relevant = events.filter { it.channel != DiagnosticChannel.APP && it.channel != DiagnosticChannel.CLICK }
-                val keys = PathSelector.screenOffKeyCount(relevant, keycode)
+                val keys = maxOf(PathSelector.screenOffKeyCount(relevant, keycode), PathSelector.screenOffVendorCount(relevant))
                 val launches = PathSelector.screenOffLaunchCount(relevant)
                 _state.update {
                     it.copy(

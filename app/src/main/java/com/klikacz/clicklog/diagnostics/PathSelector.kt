@@ -6,6 +6,9 @@ import com.klikacz.clicklog.data.DiagnosticEntity
 
 /** Why a path was (or was not) chosen; drives the wizard's message (spec §3.3). */
 enum class PathReason {
+    /** Rule 0: the vendor reports the key directly to the app (Samsung XCover / Top key). */
+    VENDOR_BROADCAST,
+
     /** Rule 1: accessibility service saw ≥ 3 DOWN events of one keycode. */
     ACCESSIBILITY_KEY,
 
@@ -54,6 +57,7 @@ object PathSelector {
         }
         val asAny = events.any { it.channel == DiagnosticChannel.ACCESSIBILITY_KEY }
         val launches = events.filter { it.channel == DiagnosticChannel.LAUNCH_INTENT || it.channel == DiagnosticChannel.MAIN_INTENT }
+        val vendorDown = events.filter { it.channel == DiagnosticChannel.VENDOR_BROADCAST && it.isKeyDown }
         val vendor = events.count { it.channel == DiagnosticChannel.VENDOR_BROADCAST }
         val media = events.count { it.channel == DiagnosticChannel.MEDIA_BUTTON }
 
@@ -65,6 +69,13 @@ object PathSelector {
             vendorBroadcastCount = vendor,
             mediaButtonCount = media,
         )
+
+        // Rule 0: a vendor key broadcast is the officially supported channel (works with the
+        // screen off) and does not require consuming the key, so it wins when present.
+        if (vendorDown.size >= MIN_SAME_KEYCODE) {
+            val kc = vendorDown.groupingBy { it.keycode }.eachCount().maxByOrNull { it.value }?.key
+            return decision(ClickSourceType.VENDOR_BROADCAST, kc, null, PathReason.VENDOR_BROADCAST)
+        }
 
         // Rule 1
         val best = asDown.groupBy { it.keycode }
@@ -100,8 +111,9 @@ object PathSelector {
         val activityDown = events.count {
             it.channel == DiagnosticChannel.ACTIVITY_KEY && it.isKeyDown && it.keycode !in IGNORED_ACTIVITY_KEYCODES
         }
+        val vendorDown = events.count { it.channel == DiagnosticChannel.VENDOR_BROADCAST && it.isKeyDown }
         val launches = events.count { it.channel == DiagnosticChannel.LAUNCH_INTENT || it.channel == DiagnosticChannel.MAIN_INTENT }
-        return maxOf(asDown, activityDown) + launches
+        return maxOf(asDown, activityDown, vendorDown) + launches
     }
 
     /**
@@ -110,7 +122,10 @@ object PathSelector {
      * which arrive regardless of screen state.
      */
     fun screenOffPressCount(events: List<DiagnosticEntity>, keycode: Int?): Int =
-        screenOffKeyCount(events, keycode) + screenOffLaunchCount(events)
+        maxOf(screenOffKeyCount(events, keycode), screenOffVendorCount(events)) + screenOffLaunchCount(events)
+
+    fun screenOffVendorCount(events: List<DiagnosticEntity>): Int =
+        events.count { it.channel == DiagnosticChannel.VENDOR_BROADCAST && it.isKeyDown && !it.screenOn }
 
     fun screenOffKeyCount(events: List<DiagnosticEntity>, keycode: Int?): Int = events.count {
         it.channel == DiagnosticChannel.ACCESSIBILITY_KEY && it.isKeyDown && !it.screenOn &&

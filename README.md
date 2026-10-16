@@ -38,12 +38,13 @@ kluczem po wersji z innym podpisem wymaga jeszcze jednorazowego odinstalowania.
 
 ## Jak to działa
 
-Dwie ścieżki przechwytywania, obie zaimplementowane za wspólnym interfejsem `ClickSource`:
+Trzy ścieżki przechwytywania za wspólnym interfejsem `ClickSource`:
 
 | Ścieżka | Klasa | Mechanizm |
 |---|---|---|
 | A `KEY_EVENT` | `ClickAccessibilityService` → `KeyEventClickSource` | `AccessibilityService.onKeyEvent` z `canRequestFilterKeyEvents`; działa w tle i przy zgaszonym ekranie, znacznik czasu z `KeyEvent.eventTime`; zdarzenie z zapamiętanym keycode jest konsumowane |
 | B `LAUNCH_INTENT` | `LaunchReceiverActivity` → `IntentClickSource` | system uruchamia niewidoczną aktywność; czas pobierany w pierwszej linii `onCreate` |
+| C `VENDOR_BROADCAST` | `SamsungHardKeyReceiver` → `BroadcastClickSource` | Samsung XCover / górny przycisk: `HARD_KEY_REPORT` (meta-data `HARD_KEY_PRESS` w manifeście czyni aplikację wybieralną w Ustawienia → Funkcje zaawansowane → Przycisk XCover / Górny przycisk); działa przy zgaszonym ekranie, bez usługi dostępności |
 
 **Obie ścieżki działają jednocześnie.** Na CAT S75 systemowa obsługa przycisku (`com.bullitt.wave`)
 dostarcza gest różnie zależnie od stanu ekranu: pojedyncze naciśnięcie to surowy keycode 291

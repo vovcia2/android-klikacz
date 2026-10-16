@@ -61,3 +61,17 @@ Wyniki wpisywać w kolumnie *Wynik* (data, wersja aplikacji, uwagi).
    Keycode: **291** (vendor: `KEYCODE_MACRO1_ON`), scancode: **183**, urządzenie wejściowe:
    `gpio_keys` (deviceId 9, source 0x101). Krótkie naciśnięcie trwa ok. 180 ms
    (DOWN→UP), więc domyślny debounce 150 ms nie zjada naciśnięć.
+
+## Samsung Galaxy XCover 7 Pro (od v0.1.14)
+
+Przycisk XCover (kod 1015) i górny przycisk (kod 1079) zgłaszają się do aplikacji broadcastem
+`com.samsung.android.knox.intent.action.HARD_KEY_REPORT` (ścieżka C). Aplikacja pojawia się
+na liście w Ustawienia → Funkcje zaawansowane → Przycisk XCover / Górny przycisk dzięki
+meta-data `HARD_KEY_PRESS` w manifeście (dokumentacja Samsung Knox „Unmanaged key mappings”).
+
+| # | Test | Oczekiwane | Wynik |
+|---|---|---|---|
+| S1 | ClickLog na liście aplikacji dla przycisku XCover i górnego | oba przyciski dają się przypisać do ClickLog | |
+| S2 | Kreator krok 3: 3 naciśnięcia | VENDOR_BROADCAST DOWN/UP ×3, wybrana ścieżka C, kod 1015 lub 1079 | |
+| S3 | Kreator krok 4 (ekran zgaszony, co ~3 s) | 3/3 jako broadcast z „ekran zgaszony” | |
+| S4 | Przytrzymanie / podwójne naciśnięcie | brak duplikatów (debounce 150 ms) | |

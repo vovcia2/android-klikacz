@@ -30,9 +30,10 @@
     <!-- Paths -->
     <string name="path_a">A – KEY_EVENT (usługa dostępności) + uruchomienia</string>
     <string name="path_b">B – LAUNCH_INTENT (uruchomienie aplikacji)</string>
+    <string name="path_c">C – broadcast producenta (Samsung XCover / górny przycisk)</string>
     <string name="path_none">brak (nie wykryto)</string>
     <string name="path_mode_auto">AUTO (wynik kreatora)</string>
-    <string name="path_launch_note">Uruchomienia „ClickLog – button” są liczone zawsze, niezależnie od ścieżki.</string>
+    <string name="path_launch_note">Uruchomienia „ClickLog – button” i broadcasty producenta (Samsung XCover / górny przycisk) są liczone zawsze, niezależnie od ścieżki.</string>
 
     <!-- Main screen -->
     <string name="main_title">ClickLog</string>
@@ -108,7 +109,7 @@
     <string name="wizard_title">Kreator konfiguracji</string>
     <string name="wizard_step">Krok %1$d z %2$d</string>
     <string name="wizard_step1_title">1. Przypisz przycisk SOS do ClickLog</string>
-    <string name="wizard_step1_text">W ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do „ClickLog – button” (jeśli lista pokazuje dwa wpisy ClickLog, wybierz ten z dopiskiem „button”). Jeśli system pozwala przypisać aplikację tylko do podwójnego naciśnięcia, użyj go i w ustawieniach ClickLog wybierz „Gest: podwójne naciśnięcie”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
+    <string name="wizard_step1_text">Samsung XCover: Ustawienia → Funkcje zaawansowane → Przycisk XCover (lub Górny przycisk) → włącz „Steruj przyciskiem za pomocą aplikacji” / „Otwórz aplikację” i wybierz ClickLog. CAT: w ustawieniach systemu otwórz „Przycisk programowalny” (Programmable Key). Przypisz krótkie naciśnięcie do „ClickLog – button” (jeśli lista pokazuje dwa wpisy ClickLog, wybierz ten z dopiskiem „button”). Jeśli system pozwala przypisać aplikację tylko do podwójnego naciśnięcia, użyj go i w ustawieniach ClickLog wybierz „Gest: podwójne naciśnięcie”. Wyłącz domyślną akcję SOS / połączenia alarmowego, żeby przycisk nie dzwonił pod numer alarmowy.</string>
     <string name="wizard_step1_open_settings">Otwórz ustawienia systemu</string>
     <string name="wizard_step2_title">2. Włącz usługę dostępności</string>
     <string name="wizard_step2_text">Usługa dostępności pozwala odbierać przycisk jako KeyEvent także przy zgaszonym ekranie (ścieżka A). Otwórz ustawienia dostępności, znajdź „ClickLog – przycisk SOS” i włącz. Jeśli system nie pozwoli, kreator użyje ścieżki B.</string>
@@ -124,6 +125,7 @@
     <string name="wizard_step3_start">Rozpocznij test</string>
     <string name="wizard_step3_summary">Podsumowanie</string>
     <string name="wizard_summary_counts">Usługa dostępności: %1$d · Activity: %2$d · Intenty: %3$d · Broadcasty: %4$d · Media: %5$d</string>
+    <string name="wizard_reason_vendor">System zgłasza przycisk bezpośrednio do aplikacji (kod %1$d; 1015 = przycisk XCover, 1079 = górny przycisk). Wybrano ścieżkę C – działa także przy zgaszonym ekranie, usługa dostępności nie jest potrzebna.</string>
     <string name="wizard_reason_accessibility">Usługa dostępności widzi przycisk (keycode %1$d). Wybrano ścieżkę A.</string>
     <string name="wizard_reason_activity_only">Przycisk dociera do ekranu aplikacji (keycode %1$d), ale usługa dostępności go nie przechwytuje – ścieżka A nie zadziała w tle. Zostanie użyta ścieżka B.</string>
     <string name="wizard_reason_activity_only_disabled">Przycisk dociera do ekranu aplikacji (keycode %1$d), ale usługa dostępności ClickLog jest wyłączona, więc w tle (przy włączonym ekranie) kliknięcia nie będą liczone. Wróć do kroku 2, włącz usługę i powtórz test.</string>

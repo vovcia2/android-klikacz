@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** How the active capture path is chosen (spec §2.2 "wybór ścieżki AUTO / A / B"). */
-enum class PathMode { AUTO, KEY_EVENT, LAUNCH_INTENT }
+enum class PathMode { AUTO, KEY_EVENT, LAUNCH_INTENT, VENDOR_BROADCAST }
 
 /**
  * Which key gesture is assigned to ClickLog in the system's Programmable Key settings.
@@ -62,6 +62,7 @@ data class AppSettings(
             PathMode.AUTO -> diagnosis?.path
             PathMode.KEY_EVENT -> ClickSourceType.KEY_EVENT
             PathMode.LAUNCH_INTENT -> ClickSourceType.LAUNCH_INTENT
+            PathMode.VENDOR_BROADCAST -> ClickSourceType.VENDOR_BROADCAST
         }
 
     /** Window for the second KeyEvent of a double press; 0 in single-press mode. */

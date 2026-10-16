@@ -18,10 +18,10 @@ import kotlinx.coroutines.withContext
  *  - [debounceMs]: any raw click closer than this to the gesture start is bounce / auto-repeat;
  *  - [doublePressWindowMs] (0 = single-press mode): in double-press mode a second KeyEvent
  *    closer than this to the gesture start is the second half of the gesture;
- *  - [crossSourceMergeMs]: the same press can be seen twice, as a KeyEvent and as an app launch
- *    by the vendor key handler. One launch (resp. one key) closer than this to the gesture's
- *    last event is merged into it. A gesture never absorbs a second launch, and never absorbs a
- *    key once it has keys, so two real presses are never collapsed through a launch between them.
+ *  - [crossSourceMergeMs]: the same press can be seen more than once (KeyEvent, app launch,
+ *    vendor broadcast). One click per *other* source closer than this to the gesture's last
+ *    event is merged into it. A gesture never absorbs a second click of the same non-key source,
+ *    and never absorbs a key once it has keys, so two real presses are never collapsed.
  *
  * Pure Kotlin so it can be unit-tested; Android wiring lives in [ClickPipeline].
  *
@@ -38,7 +38,13 @@ class ClickProcessor(
     private val crossSourceMergeMs: () -> Int = { DEFAULT_CROSS_SOURCE_MERGE_MS },
     private val doublePressWindowMs: () -> Int = { 0 },
 ) {
-    private class Gesture(val startMs: Long, var lastMs: Long, var keyCount: Int, var launchCount: Int)
+    private class Gesture(val startMs: Long, var lastMs: Long, first: ClickSourceType) {
+        val counts: MutableMap<ClickSourceType, Int> = mutableMapOf(first to 1)
+        val keyCount: Int get() = counts[ClickSourceType.KEY_EVENT] ?: 0
+        fun has(source: ClickSourceType) = (counts[source] ?: 0) > 0
+        fun hasOther(source: ClickSourceType) = counts.any { it.key != source && it.value > 0 }
+        fun add(source: ClickSourceType) { counts[source] = (counts[source] ?: 0) + 1 }
+    }
 
     private val queue = Channel<ClickEntity>(Channel.UNLIMITED)
     private val _stored = MutableSharedFlow<ClickEntity>(extraBufferCapacity = 64)
@@ -69,12 +75,7 @@ class ClickProcessor(
             g.lastMs = raw.monotonicMs
             return null
         }
-        gesture = Gesture(
-            startMs = raw.monotonicMs,
-            lastMs = raw.monotonicMs,
-            keyCount = if (raw.source == ClickSourceType.KEY_EVENT) 1 else 0,
-            launchCount = if (raw.source == ClickSourceType.LAUNCH_INTENT) 1 else 0,
-        )
+        gesture = Gesture(startMs = raw.monotonicMs, lastMs = raw.monotonicMs, first = raw.source)
         val entity = ClickEntity(
             sessionId = sessionId(),
             wallTimeMs = raw.wallTimeMs,
@@ -88,15 +89,22 @@ class ClickProcessor(
     private fun absorb(g: Gesture, raw: RawClick): Boolean {
         val sinceStart = raw.monotonicMs - g.startMs
         val sinceLast = raw.monotonicMs - g.lastMs
-        if (sinceStart < debounceMs()) return true
+        if (sinceStart < debounceMs()) {
+            // Bounce / auto-repeat. A non-key source arriving this fast is still *this* gesture's
+            // launch or broadcast, so record it: the gesture must not absorb another one later.
+            if (raw.source != ClickSourceType.KEY_EVENT) g.add(raw.source)
+            return true
+        }
         return when (raw.source) {
             ClickSourceType.KEY_EVENT -> when {
-                g.keyCount == 1 && sinceStart < doublePressWindowMs() -> { g.keyCount++; true }
-                g.keyCount == 0 && g.launchCount > 0 && sinceLast < crossSourceMergeMs() -> { g.keyCount++; true }
+                g.keyCount == 1 && sinceStart < doublePressWindowMs() -> { g.add(raw.source); true }
+                g.keyCount == 0 && g.hasOther(raw.source) && sinceLast < crossSourceMergeMs() -> { g.add(raw.source); true }
                 else -> false
             }
-            ClickSourceType.LAUNCH_INTENT -> when {
-                g.launchCount == 0 && g.keyCount > 0 && sinceLast < crossSourceMergeMs() -> { g.launchCount++; true }
+            // Launches and vendor broadcasts: at most one per gesture, merged only into a gesture
+            // that already has a click from a different source.
+            else -> when {
+                !g.has(raw.source) && g.hasOther(raw.source) && sinceLast < crossSourceMergeMs() -> { g.add(raw.source); true }
                 else -> false
             }
         }

@@ -2,10 +2,14 @@ package com.klikacz.clicklog.clicks
 
 import kotlinx.coroutines.flow.Flow
 
-/** Capture path (spec §4). A = KEY_EVENT, B = LAUNCH_INTENT. */
+/**
+ * Capture path (spec §4). A = KEY_EVENT, B = LAUNCH_INTENT, C = VENDOR_BROADCAST
+ * (e.g. Samsung XCover / Top key `HARD_KEY_REPORT`).
+ */
 enum class ClickSourceType(val letter: String) {
     KEY_EVENT("A"),
     LAUNCH_INTENT("B"),
+    VENDOR_BROADCAST("C"),
 }
 
 /**

@@ -23,6 +23,9 @@ class ClickProcessorTest {
     private fun intent(monotonic: Long, wall: Long = 1_000_000L + monotonic) =
         RawClick(wallTimeMs = wall, uptimeMs = null, monotonicMs = monotonic, source = ClickSourceType.LAUNCH_INTENT)
 
+    private fun broadcast(monotonic: Long, wall: Long = 1_000_000L + monotonic) =
+        RawClick(wallTimeMs = wall, uptimeMs = null, monotonicMs = monotonic, source = ClickSourceType.VENDOR_BROADCAST)
+
     /**
      * The processor's consumer coroutine runs on the test scheduler under a job we cancel at the
      * end of each test; `backgroundScope` is not driven by `advanceUntilIdle`.
@@ -252,6 +255,45 @@ class ClickProcessorTest {
     fun `single press mode - two key events 250 ms apart are two clicks`() = harnessTest { h ->
         assertNotNull(h.processor.offer(key(1_000)))
         assertNotNull(h.processor.offer(key(1_250)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    // ---- vendor broadcast source --------------------------------------------------------------
+
+    @Test
+    fun `broadcast presses two seconds apart are separate clicks`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(broadcast(1_000)))
+        assertNotNull(h.processor.offer(broadcast(3_000)))
+        advanceUntilIdle()
+        assertEquals(listOf(ClickSourceType.VENDOR_BROADCAST, ClickSourceType.VENDOR_BROADCAST), h.persisted.map { it.source })
+    }
+
+    @Test
+    fun `broadcast shortly after the key event of the same press is merged`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNull(h.processor.offer(broadcast(1_050)))
+        assertNotNull(h.processor.offer(key(2_000)))
+        assertNull(h.processor.offer(broadcast(2_040)))
+        advanceUntilIdle()
+        assertEquals(2, h.persisted.size)
+    }
+
+    @Test
+    fun `key event shortly after the broadcast of the same press is merged`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(broadcast(1_000)))
+        assertNull(h.processor.offer(key(1_030)))
+        advanceUntilIdle()
+        assertEquals(1, h.persisted.size)
+        assertEquals(ClickSourceType.VENDOR_BROADCAST, h.persisted.single().source)
+    }
+
+    @Test
+    fun `a gesture may hold one launch and one broadcast but never two broadcasts`() = harnessTest { h ->
+        assertNotNull(h.processor.offer(key(1_000)))
+        assertNull(h.processor.offer(broadcast(1_050)))
+        assertNull(h.processor.offer(intent(1_300)))
+        assertNotNull(h.processor.offer(broadcast(1_500)))
         advanceUntilIdle()
         assertEquals(2, h.persisted.size)
     }

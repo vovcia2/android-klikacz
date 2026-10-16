@@ -28,6 +28,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClickLog">
 
+        <!--
+            Samsung XCover / Top key: this meta-data makes the app selectable under
+            Settings > Advanced features > XCover key / Top key ("Control key with app").
+        -->
+        <meta-data
+            android:name="com.samsung.android.knox.intent.action.HARD_KEY_PRESS"
+            android:value="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -96,6 +104,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Samsung XCover / Top key presses (path C). Sent by the system only when the user bound the key to ClickLog. -->
+        <receiver
+            android:name=".service.SamsungHardKeyReceiver"
+            android:exported="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.samsung.android.knox.intent.action.HARD_KEY_REPORT" />
             </intent-filter>
         </receiver>
 

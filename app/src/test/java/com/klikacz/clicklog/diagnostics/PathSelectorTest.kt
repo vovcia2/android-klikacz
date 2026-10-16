@@ -17,6 +17,9 @@ class PathSelectorTest {
         DiagnosticEntity(tsMs = ts++, channel = channel, intentAction = "android.intent.action.MAIN", screenOn = screenOn)
 
     private fun broadcast() = DiagnosticEntity(tsMs = ts++, channel = DiagnosticChannel.VENDOR_BROADCAST, intentAction = "com.bullitt.sos.ACTION_SOS")
+    private fun samsung(keycode: Int = 1015, action: String = DiagnosticEntity.ACTION_DOWN, screenOn: Boolean = true) =
+        DiagnosticEntity(tsMs = ts++, channel = DiagnosticChannel.VENDOR_BROADCAST, keycode = keycode, action = action,
+            intentAction = "com.samsung.android.knox.intent.action.HARD_KEY_REPORT", screenOn = screenOn)
     private fun media(keycode: Int = 79) = key(DiagnosticChannel.MEDIA_BUTTON, keycode)
 
     private val AS = DiagnosticChannel.ACCESSIBILITY_KEY
@@ -177,5 +180,45 @@ class PathSelectorTest {
         )
         assertEquals(2, PathSelector.screenOffPressCount(events, 288))
         assertEquals(3, PathSelector.screenOffPressCount(events, null))
+    }
+
+    // ---- Rule 0: vendor key broadcasts (Samsung XCover / Top key) ----------------------------
+
+    @Test
+    fun `rule 0 - three samsung key-down broadcasts select path C with the key code`() {
+        val up = DiagnosticEntity.ACTION_UP
+        val d = PathSelector.select(listOf(samsung(), samsung(action = up), samsung(), samsung(action = up), samsung()))
+        assertEquals(ClickSourceType.VENDOR_BROADCAST, d.path)
+        assertEquals(1015, d.keycode)
+        assertEquals(PathReason.VENDOR_BROADCAST, d.reason)
+    }
+
+    @Test
+    fun `rule 0 - top key reports 1079`() {
+        val d = PathSelector.select(listOf(samsung(1079), samsung(1079), samsung(1079)))
+        assertEquals(1079, d.keycode)
+    }
+
+    @Test
+    fun `rule 0 - wins over accessibility when both see the key`() {
+        val d = PathSelector.select(listOf(samsung(), key(AS, 1015), samsung(), key(AS, 1015), samsung(), key(AS, 1015)))
+        assertEquals(ClickSourceType.VENDOR_BROADCAST, d.path)
+    }
+
+    @Test
+    fun `rule 0 - broadcasts without key-down action do not count`() {
+        val d = PathSelector.select(listOf(broadcast(), broadcast(), broadcast()))
+        assertEquals(PathReason.NOT_DETECTED, d.reason)
+    }
+
+    @Test
+    fun `pressCount does not double count a press seen as key and as broadcast`() {
+        assertEquals(2, PathSelector.pressCount(listOf(samsung(), key(AS, 1015), samsung(), key(AS, 1015))))
+    }
+
+    @Test
+    fun `screenOffPressCount counts screen-off broadcasts`() {
+        val events = listOf(samsung(screenOn = false), samsung(screenOn = false), samsung(screenOn = true))
+        assertEquals(2, PathSelector.screenOffPressCount(events, null))
     }
 }

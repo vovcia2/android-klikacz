@@ -54,6 +54,12 @@ object SystemIntents {
             Intent().setClassName("com.cat.programmablekey", "com.cat.programmablekey.MainActivity"),
             Intent("com.bullitt.programmablekey.SETTINGS"),
             Intent("com.bullitt.intent.action.PROGRAMMABLE_KEY_SETTINGS"),
+            // Samsung XCover / Top key (Settings > Advanced features)
+            Intent().setClassName("com.android.settings", "com.android.settings.Settings\$XCoverKeySettingsActivity"),
+            Intent().setClassName("com.android.settings", "com.samsung.android.settings.xcover.XCoverKeySettings"),
+            Intent("com.samsung.settings.XCOVER_KEY_SETTINGS"),
+            Intent("com.samsung.settings.ACTIVE_KEY_SETTINGS"),
+            Intent("android.settings.ADVANCED_FEATURES_SETTINGS"),
         )
         val pm = context.packageManager
         val found = candidates.firstOrNull { pm.resolveActivity(it, 0) != null }
